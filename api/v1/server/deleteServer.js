@@ -74,7 +74,7 @@ async function deleteServer(req, res) {
         }
       })
       .catch(function (error) {
-        res.send(error);
+        res.json({status: "error", data: error.message});
       });
   } else if (type == "docker") {
     const Dockerode = require("dockerode");

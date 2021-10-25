@@ -89,7 +89,7 @@ function createServer(req, res) {
             {
               headers: {
                 Authorization: `Bearer ${process.env.DAEMON_KEY}`,
-              }
+              },
             }
           )
           .then(function (allocation_response) {
@@ -102,181 +102,211 @@ function createServer(req, res) {
                 status: "success",
                 data: "The installation has started.",
               });
-              docker.pull(magma_cube.images[req.body.image_group][req.body.image_index].image, function(err, pullStream){
-                if (err){
-                  console.log(err)
-                }
-                docker.modem.followProgress(pullStream, onFinished, onProgress);
-                function onFinished(err, output){
-                  docker.createContainer(
-                    {
-                      Image: "hello:latest",
-                      name: req.body.id,
-                      User: `${magma_cube.images[req.body.image_group][req.body.image_index].user}`,
-                      OpenStdin: true,
-                      AttachStdin: true,
-                      AttachStdout: true,
-                      AttachStderr: true,
-                      Volumes: {
-                        [magma_cube.mount ? `${magma_cube.mount}` : "/"]: {},
-                      },
-                      Tty: true,
-                      Env: [`SERVER_CONFIG_MEMORY=${req.body.limits.memory}`, `SERVER_CONFIG_DISK=${req.body.limits.disk}`, `SERVER_CONFIG_CPU=${req.body.limits.cpu}`, `SERVER_CONFIG_MOUNT=${magma_cube.mount}`].concat(req.body.env),
-                      ExposedPorts: {
-                        [`${allocation.port}/tcp`]: {},
-                        [`${allocation.port}/udp`]: {},
-                      }, // ports array
-                      HostConfig: {
-                        PortBindings: {
-                          [`${allocation.port}/tcp`]: [
-                            {
-                              HostIp: "0.0.0.0",
-                              HostPort: `${allocation.port}`,
-                            },
-                          ],
-                          [`${allocation.port}/udp`]: [
-                            {
-                              HostIp: "0.0.0.0",
-                              HostPort: `${allocation.port}`,
-                            },
-                          ],
+              docker.pull(
+                magma_cube.images[req.body.image_group][req.body.image_index]
+                  .image,
+                function (err, pullStream) {
+                  if (err) {
+                    console.log(err);
+                  }
+                  docker.modem.followProgress(
+                    pullStream,
+                    onFinished,
+                    onProgress
+                  );
+                  function onFinished(err, output) {
+                    docker.createContainer(
+                      {
+                        Image: "hello:latest",
+                        name: req.body.id,
+                        User: `${
+                          magma_cube.images[req.body.image_group][
+                            req.body.image_index
+                          ].user
+                        }`,
+                        OpenStdin: true,
+                        AttachStdin: true,
+                        AttachStdout: true,
+                        AttachStderr: true,
+                        Volumes: {
+                          [magma_cube.mount ? `${magma_cube.mount}` : "/"]: {},
                         },
-                        Memory: Math.round(req.body.limits.memory * 1000000),
-                        MemoryReservation: Math.round(req.body.limits.memory * 1000000),
-                        MemorySwap: -1,
-                        CpuQuota: req.body.limits.cpu > 0 ? req.body.limits.cpu * 100000 : -1,
-                        CpuPeriod: 100000,
-                        CpuShares: 1024,
-                        BlkioWeight: 500,
-                        Dns: ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"],
-                        SecurityOpt: ["no-new-privileges"],
-                        DiskQuota: Math.round(req.body.limits.disk * 1000000),
-                        CapDrop: [
-                          "setpcap",
-                          "mknod",
-                          "audit_write",
-                          "net_raw",
-                          "dac_override",
-                          "fowner",
-                          "fsetid",
-                          "net_bind_service",
-                          "sys_chroot",
-                          "setfcap",
-                        ],
-                        OomKillDisable: false,
-                        LogConfig: {
-                          Type: "json-file",
-                          Config: {
-                            "max-size": "5m",
-                            "max-file": "1",
+                        Tty: true,
+                        Env: [
+                          `SERVER_CONFIG_MEMORY=${req.body.limits.memory}`,
+                          `SERVER_CONFIG_DISK=${req.body.limits.disk}`,
+                          `SERVER_CONFIG_CPU=${req.body.limits.cpu}`,
+                          `SERVER_CONFIG_MOUNT=${magma_cube.mount}`,
+                        ].concat(req.body.env),
+                        ExposedPorts: {
+                          [`${allocation.port}/tcp`]: {},
+                          [`${allocation.port}/udp`]: {},
+                        }, // ports array
+                        HostConfig: {
+                          PortBindings: {
+                            [`${allocation.port}/tcp`]: [
+                              {
+                                HostIp: "0.0.0.0",
+                                HostPort: `${allocation.port}`,
+                              },
+                            ],
+                            [`${allocation.port}/udp`]: [
+                              {
+                                HostIp: "0.0.0.0",
+                                HostPort: `${allocation.port}`,
+                              },
+                            ],
+                          },
+                          Memory: Math.round(req.body.limits.memory * 1000000),
+                          MemoryReservation: Math.round(
+                            req.body.limits.memory * 1000000
+                          ),
+                          MemorySwap: -1,
+                          CpuQuota:
+                            req.body.limits.cpu > 0
+                              ? req.body.limits.cpu * 100000
+                              : -1,
+                          CpuPeriod: 100000,
+                          CpuShares: 1024,
+                          BlkioWeight: 500,
+                          Dns: ["1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4"],
+                          SecurityOpt: ["no-new-privileges"],
+                          DiskQuota: Math.round(req.body.limits.disk * 1000000),
+                          CapDrop: [
+                            "setpcap",
+                            "mknod",
+                            "audit_write",
+                            "net_raw",
+                            "dac_override",
+                            "fowner",
+                            "fsetid",
+                            "net_bind_service",
+                            "sys_chroot",
+                            "setfcap",
+                          ],
+                          OomKillDisable: false,
+                          LogConfig: {
+                            Type: "json-file",
+                            Config: {
+                              "max-size": "5m",
+                              "max-file": "1",
+                            },
                           },
                         },
                       },
-                    },
-                    function (err, container) {
-                      if (err) {
-                        console.error(err);
-                        //Mark install as failed on panel
-                      } else {
-                        container.inspect(function (err, container_data) {
-                          var basepath = container_data.Mounts[0].Source;
-                          var file_config = [
-                            {
-                              file_name: "server.properties",
-                              parser: "properties",
-                              options: [
-                                { key: "server-ip", value: "0.0.0.0" },
-                                { key: "server-port", value: `${allocation.port}` },
-                              ],
-                            },
-                          ];
-                          file_config.forEach(function (file) {
-                            console.log(file);
-                            if (file.parser == "properties") {
-                              const properties = require("properties-parser");
-                              file.options.forEach(function (option) {
-                                console.log(option.value);
-                                properties.createEditor(
-                                  `${basepath}/${file.file_name}`,
-                                  function (error, editor) {
-                                    editor.set(option.key, option.value);
-                                    editor.save(`${basepath}/${file.file_name}`);
-                                  }
-                                );
-                              });
-                            }
-                          });
-                          //Mark container as installed on panel.
-                          axios
-                            .put(
-                              `https://us-central1-hye-ararat.cloudfunctions.net/api/v1/${process.env.INSTANCE_ID}/admin/servers/${req.body.id}/install`,
+                      function (err, container) {
+                        if (err) {
+                          console.error(err);
+                          //Mark install as failed on panel
+                        } else {
+                          container.inspect(function (err, container_data) {
+                            var basepath = container_data.Mounts[0].Source;
+                            var file_config = [
                               {
-                                installing: false,
+                                file_name: "server.properties",
+                                parser: "properties",
+                                options: [
+                                  { key: "server-ip", value: "0.0.0.0" },
+                                  {
+                                    key: "server-port",
+                                    value: `${allocation.port}`,
+                                  },
+                                ],
                               },
-                            )
-                            .then(function () {
-                              console.log("marked as installed");
-                            })
-                            .catch(function (error) {
-                              console.log(
-                                "error while marking server as installed"
-                              );
-                              console.log(error);
+                            ];
+                            file_config.forEach(function (file) {
+                              console.log(file);
+                              if (file.parser == "properties") {
+                                const properties = require("properties-parser");
+                                file.options.forEach(function (option) {
+                                  console.log(option.value);
+                                  properties.createEditor(
+                                    `${basepath}/${file.file_name}`,
+                                    function (error, editor) {
+                                      editor.set(option.key, option.value);
+                                      editor.save(
+                                        `${basepath}/${file.file_name}`
+                                      );
+                                    }
+                                  );
+                                });
+                              }
                             });
-                          //Maybe remove??
-                          container.start(function (err_start) {
-                            if (err_start) {
-                              //res.status(500).json({ status: 'error', data: err_start.message })
-                              //mark install failed
-                            } else {
-                              container
-                                .attach({
-                                  stream: true,
-                                  stdin: true,
-                                  stdout: true,
-                                  stderr: true,
-                                })
-                                .then((stream) => {
-                                  //res.status(201).json({ status: 'success', data: container_data })
-                                  stream.setEncoding("utf8");
-                                  var state = "starting";
-                                  var start_triggers = [
-                                    ["Done (", "! For help, type"],
-                                  ];
-                                  stream.on("data", (data) => {
-                                    data.split("\n").forEach((element) => {
-                                      if (!element == "") console.log(element);
-                                      if (state != "running") {
-                                        start_triggers.forEach(function (
-                                          trigger_set
-                                        ) {
-                                          var started = trigger_set.every(function (
-                                            trigger
+                            //Mark container as installed on panel.
+                            axios
+                              .put(
+                                `https://us-central1-hye-ararat.cloudfunctions.net/api/v1/${process.env.INSTANCE_ID}/admin/servers/${req.body.id}/install`,
+                                {
+                                  installing: false,
+                                }
+                              )
+                              .then(function () {
+                                console.log("marked as installed");
+                              })
+                              .catch(function (error) {
+                                console.log(
+                                  "error while marking server as installed"
+                                );
+                                console.log(error);
+                              });
+                            //Maybe remove??
+                            container.start(function (err_start) {
+                              if (err_start) {
+                                //res.status(500).json({ status: 'error', data: err_start.message })
+                                //mark install failed
+                              } else {
+                                container
+                                  .attach({
+                                    stream: true,
+                                    stdin: true,
+                                    stdout: true,
+                                    stderr: true,
+                                  })
+                                  .then((stream) => {
+                                    //res.status(201).json({ status: 'success', data: container_data })
+                                    stream.setEncoding("utf8");
+                                    var state = "starting";
+                                    var start_triggers = [
+                                      ["Done (", "! For help, type"],
+                                    ];
+                                    stream.on("data", (data) => {
+                                      data.split("\n").forEach((element) => {
+                                        if (!element == "")
+                                          console.log(element);
+                                        if (state != "running") {
+                                          start_triggers.forEach(function (
+                                            trigger_set
                                           ) {
-                                            return element.includes(trigger);
-                                          });
-                                          if (started == true) {
-                                            state = "running";
-                                            console.log(
-                                              "THE SERVER HAS BEEN MARKED AS RUNNING!"
+                                            var started = trigger_set.every(
+                                              function (trigger) {
+                                                return element.includes(
+                                                  trigger
+                                                );
+                                              }
                                             );
-                                          }
-                                        });
-                                      }
+                                            if (started == true) {
+                                              state = "running";
+                                              console.log(
+                                                "THE SERVER HAS BEEN MARKED AS RUNNING!"
+                                              );
+                                            }
+                                          });
+                                        }
+                                      });
                                     });
                                   });
-                                });
-                            }
+                              }
+                            });
                           });
-                        });
+                        }
                       }
-                    }
-                  );
+                    );
+                  }
+                  function onProgress(event) {
+                    console.log(event);
+                  }
                 }
-                function onProgress(event){
-                  console.log(event)
-                }
-              })
+              );
             } else {
               res.send("Invalid Allocation");
             }
@@ -288,7 +318,7 @@ function createServer(req, res) {
       })
       .catch(function (error) {
         console.log(error);
-        res.send(error);
+        res.send({ status: "error", data: error.message });
       });
   }
 
