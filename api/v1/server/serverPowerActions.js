@@ -42,17 +42,30 @@ function powerAction(req, res) {
   } else if (req.body.type == "docker") {
     const DockerClient = new (require("dockerode"))();
     var s = DockerClient.getContainer(req.params.uuid);
+    var actions = new Map();
+    actions.put("start", s.start({}));
+    actions.put("stop", s.stop({}));
+    actions.put("restart", s.restart({}));
+    actions.put("kill", s.kill({}));
     if (
       req.body.state == "start" ||
       req.body.state == "restart" ||
       req.body.state == "stop" ||
       req.body.state == "kill"
     ) {
-      s[req.body.state]({}, () => {
-        res.status(200).json({
-          status: "success",
-          data: "State action " + req.body.state + " successfully executed.",
-        });
+      actions.get(req.body.state).then(() => {
+        res
+          .status(200)
+          .json({
+            status: "success",
+            data: `State action ${req.body.state} successfully executed.`,
+          })
+          .catch(() => {
+            res.json({
+              status: "error",
+              data: `An error occured while commiting the ${req.body.state} action on the server`,
+            });
+          });
       });
     } else {
       res
