@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@wolfogaming/node-lxd": "^1.0.4",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "bytes": "^3.1.0",
     "cgroup-metrics": "^2.0.0",
     "child_process": "^1.0.2",
