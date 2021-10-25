@@ -1,6 +1,7 @@
 const { getType } = require("../../../../lib/server/getType");
 const { addAudit } = require("../../../../lib/server/addAudit");
 const axios = require("axios");
+const sanitize = require("sanitize-filename");
 //const multer = require("multer");
 async function uploadFiles(req, res) {
   console.log(req.params.server)
@@ -30,9 +31,11 @@ async function uploadFiles(req, res) {
               if (stats.isDirectory()) {
                 console.log(req.files);
                 console.log(req.files[0].originalname);
+                var file_name = sanitize(req.files[0].originalname);
+                console.log(file_name);
                 fs.rename(
-                  `./tmp/${server_name}-${req.files[0].originalname}`,
-                  path + `${req.files[0].originalname}`,
+                  `./tmp/${server_name}-${file_name}`,
+                  path + `${file_name}`,
                   function (err) {
                     if (err) {
                       res.send(err);
@@ -62,7 +65,7 @@ async function uploadFiles(req, res) {
                                 response.data.magma_cube.image_group
                               ][response.data.magma_cube.image_index].user)
                               fs.chown(
-                                path + `${req.files[0].originalname}`,
+                                path + `${file_name}`,
                                 magma_cube.data.images[
                                   response.data.magma_cube.image_group
                                 ][response.data.magma_cube.image_index].user,
@@ -77,7 +80,7 @@ async function uploadFiles(req, res) {
                                     addAudit(server_name, {
                                       type: "file",
                                       action: "upload",
-                                      name: req.files[0].originalname,
+                                      name: file_name,
                                       path: req.query.path,
                                       user: "12345",
                                     });
