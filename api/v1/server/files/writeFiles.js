@@ -1,5 +1,6 @@
 const { addAudit } = require("../../../../lib/server/addAudit");
 const {getType} = require("../../../../lib/server/getType")
+const sanitize = require("sanitize-filename");
 /**
  * Write Server Files
  * @param {*} req
@@ -22,7 +23,7 @@ async function writeFiles(req, res) {
       } else {
         var basepath = container_data.Mounts[0].Source;
         var path;
-        req.query.path ? (path = basepath + req.query.path) : (path = basepath);
+        req.query.path ? (path = basepath + sanitize(req.query.path)) : (path = basepath);
         console.log(path)
         fs.lstat(path, (err, stats) => {
           if (err) {
@@ -40,7 +41,7 @@ async function writeFiles(req, res) {
                     addAudit(server_name, {
                       type: "file",
                       action: "write",
-                      path: req.query.path,
+                      path: sanitize(req.query.path),
                       user: "12345"
                     });
                   }
