@@ -1,4 +1,5 @@
 const { getType } = require("../../../../lib/server/getType");
+const sanitize = require("sanitize-filename");
 
 async function downloadFiles(req, res) {
   var type = await getType(req.params.server);
@@ -15,7 +16,7 @@ async function downloadFiles(req, res) {
       } else {
         var basepath = container_data.Mounts[0].Source;
         var path;
-        req.query.path ? (path = basepath + req.query.path) : (path = basepath);
+        req.query.path ? (path = basepath + sanitize(req.query.path)) : (path = basepath);
         console.log(path);
         fs.lstat(path, (err, stats) => {
           if (err) {
