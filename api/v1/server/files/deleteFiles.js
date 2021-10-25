@@ -55,7 +55,7 @@ async function deleteFiles(req, res) {
               }
             } catch (error) {
               console.log(error);
-              res.send(error);
+              res.send({status: "error", data: error.message});
             }
           }
         });

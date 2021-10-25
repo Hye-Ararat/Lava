@@ -58,7 +58,7 @@ async function getFiles(req, res) {
                   });
               }
             } catch (error) {
-              res.send(error);
+              res.send({ status: "error", data: error.message });
             }
           }
         });

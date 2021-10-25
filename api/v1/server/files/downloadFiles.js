@@ -16,7 +16,9 @@ async function downloadFiles(req, res) {
       } else {
         var basepath = container_data.Mounts[0].Source;
         var path;
-        req.query.path ? (path = basepath + sanitize(req.query.path)) : (path = basepath);
+        req.query.path
+          ? (path = basepath + sanitize(req.query.path))
+          : (path = basepath);
         console.log(path);
         fs.lstat(path, (err, stats) => {
           if (err) {
@@ -31,7 +33,7 @@ async function downloadFiles(req, res) {
                 res.download(path);
               }
             } catch (error) {
-              res.send(error);
+              res.send({ status: "error", data: error.message });
             }
           }
         });
