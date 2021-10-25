@@ -13,6 +13,7 @@ async function uploadFiles(req, res) {
     const fs = require("fs");
     var container = DockerClient.getContainer(req.params.server);
     container.inspect(function (err, container_data) {
+      var server_name = container_data.Name.replace("/", "");
       if (err) {
         res.send(err.message);
       } else {
@@ -30,7 +31,7 @@ async function uploadFiles(req, res) {
                 console.log(req.files);
                 console.log(req.files[0].originalname);
                 fs.rename(
-                  `./tmp/${req.params.server}-${req.files[0].originalname}`,
+                  `./tmp/${server_name}-${req.files[0].originalname}`,
                   path + `${req.files[0].originalname}`,
                   function (err) {
                     if (err) {
@@ -38,7 +39,7 @@ async function uploadFiles(req, res) {
                     } else {
                       axios
                         .get(
-                          `https://us-central1-hye-ararat.cloudfunctions.net/api/v1/${process.env.INSTANCE_ID}/admin/servers/${req.params.server}`,
+                          `https://us-central1-hye-ararat.cloudfunctions.net/api/v1/${process.env.INSTANCE_ID}/admin/servers/${server_name}`,
                           {
                             headers: {
                               Authorization: `Bearer ${process.env.DAEMON_KEY}`,
@@ -73,7 +74,7 @@ async function uploadFiles(req, res) {
                                     console.log(error);
                                     res.send(error);
                                   } else {
-                                    addAudit(req.params.server, {
+                                    addAudit(server_name, {
                                       type: "file",
                                       action: "upload",
                                       name: req.files[0].originalname,

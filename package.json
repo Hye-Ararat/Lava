@@ -25,6 +25,7 @@
     "process": "^0.11.10",
     "prompts": "^2.4.1",
     "properties-parser": "^0.3.1",
+    "sanitize-filename": "^1.6.3",
     "ws": "^8.2.2",
     "yargs": "^17.1.0"
   },
