@@ -27,14 +27,10 @@ async function deleteServer(req, res) {
       .get(`/1.0/instances/${req.params.uuid}`)
       .then(function (response) {
         if (response.data.metadata.status == "Running") {
-          const { exec } = require("child_process");
-          exec(`sudo lxc stop ${req.params.uuid} --force`, function (err) {
-            if (err) {
-              res.status(500).json({
-                status: "error",
-                data: "An error occured while stopping the instance.",
-              });
-            } else {
+          client.put(`/1.0/instances/${req.params.uuid}/state`, {
+            action: "stop",
+            force: true,
+          }).then(() => {
               client
                 .get(`/1.0/instances/${req.params.uuid}`)
                 .then(function (response) {
@@ -58,8 +54,12 @@ async function deleteServer(req, res) {
                     });
                   }
                 });
-            }
-          });
+          }).catch(() => {
+              res.status(500).json({
+                status: "error",
+                data: "An error occured while stopping the instance.",
+              });
+          })
         } else {
           deleteServer(`${req.params.uuid}`, function (response) {
             if (response.status == "error") {
