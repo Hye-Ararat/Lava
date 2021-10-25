@@ -20,7 +20,7 @@ async function uploadFiles(req, res) {
       } else {
         var basepath = container_data.Mounts[0].Source;
         var path;
-        req.query.path ? (path = basepath + req.query.path) : (path = basepath);
+        req.query.path ? (path = basepath + sanitize(req.query.path)) : (path = basepath);
         console.log(path);
         fs.lstat(path, (err, stats) => {
           if (err) {
@@ -81,7 +81,7 @@ async function uploadFiles(req, res) {
                                       type: "file",
                                       action: "upload",
                                       name: file_name,
-                                      path: req.query.path,
+                                      path: sanitize(req.query.path),
                                       user: "12345",
                                     });
                                     res.send("Success");
