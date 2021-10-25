@@ -110,7 +110,10 @@ async function uploadFiles(req, res) {
             } catch (err) {
               console.log("SOMETHING HAS GONE WRONG!!!!!!");
               console.log(err);
-              res.send(err);
+              res.json({
+                status: "error",
+                data: err.message,
+              });
             }
           }
         });
