@@ -16,6 +16,7 @@ async function writeFiles(req, res) {
     const fs = require("fs");
     var container = DockerClient.getContainer(req.params.uuid);
     container.inspect(function(err, container_data) {
+      var server_name = container_data.Name.replace("/", "");
       if (err) {
         res.send(err.message);
       } else {
@@ -36,7 +37,7 @@ async function writeFiles(req, res) {
                     res.send(err.message)
                   } else {
                     res.send("Success")
-                    addAudit(req.params.server, {
+                    addAudit(server_name, {
                       type: "file",
                       action: "write",
                       path: req.query.path,
