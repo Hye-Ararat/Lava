@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@wolfogaming/node-lxd": "^1.0.4",
     "axios": "^0.21.2",
