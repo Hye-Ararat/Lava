@@ -2,6 +2,9 @@
   "name": "hye-lava",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@mapbox/node-pre-gyp": "^1.0.6",
     "detect-libc": "^1.0.3",
