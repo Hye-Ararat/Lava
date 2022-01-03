@@ -108,3 +108,4 @@ key.key
 lxd-webui.crt
 lxd-webui.csr
 lxd-webui.key
+.DS_Store
