@@ -4,7 +4,7 @@ const { convertID } = require('../../../lib/converter');
 async function monitor(ws, req) {
 
     var authenticated = false;
-    console.log(convertID(req.params.instance))
+    //console.log(convertID(req.params.instance))
     async function start() {
         const nodexD = require("node-xd")
         const client = new nodexD("unix:///var/snap/lxd/common/lxd/unix.socket", {imageServer: null});
@@ -12,7 +12,7 @@ async function monitor(ws, req) {
         if (db.collection('instances').exist(req.params.instance) == false) {
             db.collection('instances').create(req.params.instance)
         }
-        console.log(db.collection('instances').get(req.params.instance))
+        //console.log(db.collection('instances').get(req.params.instance))
         var usage = await inst.usage()
         if (await inst.state() == "Stopped" && db.collection('instances').get(req.params.instance).state == "Online") {
             db.collection('instances').add(req.params.instance, {
@@ -31,16 +31,31 @@ async function monitor(ws, req) {
             state: db.collection('instances').get(req.params.instance).state
         }))
         var e = setInterval(async () => {
+            var state = await inst.state()
             var usage = await inst.usage()
             if (usage.cpu < 0) return;
+            //console.log(state)
             ws.send(JSON.stringify({
                 ...usage,
-                containerState: await inst.state(),
+                containerState: state,
                 state: db.collection('instances').get(req.params.instance).state
             }))
             wss.get(req.params.instance)
-
-            if (await inst.state() == "Running" && !wss.get(req.params.instance)) {
+            console.log({
+                real: state,
+                ...db.collection('instances').get(req.params.instance)
+            })
+            if (state == "Running" && db.collection('instances').get(req.params.instance).state == "Offline"){
+                db.collection('instances').add(req.params.instance, {
+                    state: "Online"
+                })
+            }
+            if (state == "Stopped" && db.collection('instances').get(req.params.instance).state == "Online"){
+                db.collection('instances').add(req.params.instance, {
+                    state: "Offline"
+                })
+            }
+            if (state == "Running" && !wss.get(req.params.instance)) {
 
                     db.collection('instances').add(req.params.instance, {
                         state: "Starting"
