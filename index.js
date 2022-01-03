@@ -19,6 +19,10 @@ const app = express()
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + '/public'));
 app.use(express.json())
+if (!fs.existsSync("./storage")) {
+    fs.mkdirSync("./storage");
+    fs.mkdirSync("./storage/instances")
+}
 if (process.env.SSL_CERT && process.env.SSL_KEY) {
     var httpsapp = https.createServer({
         cert: fs.readFileSync(process.env.SSL_CERT),
