@@ -165,7 +165,7 @@ async function setState(req, res) {
                     if (await inst.state() == "Stopped") {
                         await inst.start()
                     }
-                    var cons = await inst.console("vga", {})
+                    var cons = await inst.console("vga")
                     ws.add(req.params.instance, cons)
                     db.collection('instances').add(req.params.instance, {
                         state: "Online"
