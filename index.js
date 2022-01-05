@@ -1,7 +1,6 @@
 // imports
 process.on("unhandledRejection", (rejection) => {
-    console.log('Omyghawwwdd')
-    console.log(rejection)
+    console.error(rejection)
 })
 const express = require('express')
 const yargs = require('yargs/yargs')
@@ -59,6 +58,23 @@ module.exports = {
 
     }
 }
+client.instances().then(async instances => {
+    for (const inst of instances) {
+        var araratInstance = await ararat.instance(req.params.instance, ["magma_cube"])
+        if (araratInstance.relationships.magma_cube.stateless == true) {
+           console.log("Not setting status for stateless instance "+ inst.name())
+        } else {
+            if (await inst.state() == "Running") {
+           
+            }
+            else if (await inst.state() == "Stopped"){
+    
+            }
+        }
+
+    }
+})
+
 // read arguments
 process.argv = yargs(hideBin(process.argv)).argv
 // check for debugging
