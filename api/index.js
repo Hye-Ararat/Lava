@@ -20,4 +20,5 @@ router.ws('/instances/:instance/control', require('./instance/control/ws'))
 router.get('/instances/:instance/console', require('./instance/console/get'))
 router.ws('/instances/:instance/console/vga', require('./instance/console/vga/ws'))
 router.get('/instances/:instance/files', require('./instance/files/get'))
+router.get('/instances/:instance/files/type', require('./instance/files/type/get'))
 module.exports = router

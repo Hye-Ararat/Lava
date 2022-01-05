@@ -13,22 +13,22 @@ const { getDirList } = require('../../../lib/dirlist');
     return new Promise(async (resolve, reject) => {
         if (!path) return reject(new Error('Path not defined'))
         const url = encodeURI("/1.0/instances/"+convertID(name)+"/files?path=" + path)
-        console.log(url)
-        console.log('ok')
+        //console.log(url)
+        //console.log('ok')
         const { data, headers } = await client.client.axios({
             url,
             method: 'GET',
             responseType: 'stream'
         })
-        console.log(headers)
+        //console.log(headers)
         if(data.headers["content-type"] == "application/json") {
-            data.on('data',async (chunk) => {
+
 
                 resolve({
                     type: 'dir',
                     list: await getDirList(name, path)
                 })
-            })
+     
             
         } else {
             resolve({type: 'file', content: data.headers["content-type"]})
@@ -48,7 +48,7 @@ const { getDirList } = require('../../../lib/dirlist');
  * @returns 
  */
 async function downloadfile(req,res) {
-    console.log(req.query)
+    //console.log(req.query)
     var s = await download(req,res, req.query.path, req.params.instance)
     if (s.type == "dir") {
         res.json(s)
