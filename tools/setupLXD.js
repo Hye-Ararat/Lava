@@ -1,7 +1,6 @@
-const {spawn} = require("child_process");
-const readline = require("readline");
+const { spawn } = require("child_process");
 
-(async function setupLXD(){
+(async function setupLXD() {
     const installLXD = spawn("snap", "install lxd --channel=latest/stable".split(" "));
 
     installLXD.stdout.on('data', (data) => {
@@ -12,7 +11,7 @@ const readline = require("readline");
     });
     installLXD.on("close", (code) => {
         const refreshLXD = spawn("snap", "refresh lxd --channel=latest/stable".split(" "));
-        
+
         refreshLXD.stdout.on("data", (data) => {
             console.log(data.toString());
         })
@@ -20,40 +19,8 @@ const readline = require("readline");
             console.log(data.toString());
         })
         refreshLXD.on("close", (code) => {
-            const rl = readline.createInterface({
-                input: process.stdin,
-                output: process.stdout
-            })
-
-            var storage;
-
-            rl.question("How much storage would you like Ararat to have access to (Example: 5GB)? ", (answer) => {
-                storage = answer;
-                rl.close();
-
-                const setupLXD = spawn("lxd", ["init"]);
-                setupLXD.stdout.on("data", (data) => {
-                console.log(data.toString());
-})
-                setupLXD.stdin.write(" \n")
-                setupLXD.stdin.write(" \n")
-                setupLXD.stdin.write(" \n")
-                setupLXD.stdin.write(" \n")
-                setupLXD.stdin.write(" \n")
-                setupLXD.stdin.write(" \n")
-                setupLXD.stdin.write(storage + "\n")
-                setupLXD.stdin.write(" \n");
-                setupLXD.stdin.write("no\n");
-                setupLXD.stdin.write(" \n");
-                setupLXD.stdin.write(" \n");
-                setupLXD.stdin.write(" \n");
-                setupLXD.stdin.write(" \n");
-                setupLXD.on("close", (code) => {
-                    console.log(code);
-                    console.log("LXD installed")
-                    process.exit(0);
-                })
-            })
+            console.log("Done. Don't forget to run lxd init. When asked to create a network bridge, answer no, and when asked to create a storage pool keep all options default except the loop size (you can decide what you would like for that).");
+            process.exit(0)
         })
     });
 })();
