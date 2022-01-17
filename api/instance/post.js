@@ -9,23 +9,41 @@ module.exports = async function (req, res) {
     try {
         if (!req.body.id) return res.json({ status: "Error", data: {}, reason: "id field not specified" })
         var { id } = req.body
-        var check = await client.instance(id)
+        try {
+            var check = await client.instance(convertID(id))
+        } catch {
+            var check = null
+        }
         if (check == null) {
-            var magma_cube = await ararat.instance(id, ["magma_cube", "network_container"])
+            var magma_cube = await (await ararat.instance(id, ["magma_cube", "network"])).relationships.magma_cube
+            console.log(magma_cube)
             var internalID = convertID(id)
-            var inst = await client.create('jdk', {
-                "type": "image",                                      
-                "mode": "pull",                                       
-                "server": "https://images.speed.hye.gg:8443",                 
-                "protocol": "lxd",                                                           
-                "alias": "openjdk/17/x86_64"
-            }, {"devices": {
-                "root": {
-                  "path": "/",
-                  "pool": "defaultdir",
-                  "type": "disk"
-                }
-              }})
+            var instanceConfig = {
+                "devices": req.body.devices,
+                "config": {
+                    "environment": req.body.environment,
+                    "limits.cpu": req.body.limits.cpu.limit.toString(),
+                    "limits.memory": req.body.limits.memory.limit.toString(),
+                },
+                "type": req.body.type
+            }
+            if (req.body.type == "container") {
+                instanceConfig.config["limits.memory.enforce"] = req.body.limits.memory.enforce ? "hard" : "soft"
+                instanceConfig.config["limits.cpu.priority"] = req.body.limits.cpu.priority.toString()
+            }
+            if (req.body.limits.disk.priority != null) {
+                instanceConfig.config["limits.disk.priority"] = req.body.limits.disk.priority.toString()
+            }
+            var inst = await client.create(internalID, {
+                "source": {
+                    "type": "image",
+                    "mode": "pull",
+                    "server": magma_cube.image_server.address,
+                    "protocol": magma_cube.image_server.protocol,
+                    "alias": magma_cube.images[req.body.image].amd64,
+                },
+                ...instanceConfig
+            })
             inst.on('progress', p => {
                 console.log(p)
             })
