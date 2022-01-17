@@ -79,7 +79,7 @@
 
             try {
                 console.log('connect')
-                sc = new SpiceHtml5.SpiceMainConn({ uri: 'ws://81.205.168.8:3535/api/v1/instances/<%=server%>/console/vga', screen_id: "spice-screen", password: '', onerror: spice_error, onagent: agent_connected });
+                sc = new SpiceHtml5.SpiceMainConn({ uri: 'wss://lava.enzonet.nl/api/v1/instances/<%=server%>/console/vga', screen_id: "spice-screen", password: '', onerror: spice_error, onagent: agent_connected });
             }
             catch (e) {
                 alert(e.toString());
