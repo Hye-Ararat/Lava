@@ -12,6 +12,7 @@ async function setState(req, res) {
     if (db.collection('instances').exist(req.params.instance) == false) {
         db.collection('instances').create(req.params.instance)
     }
+    console.log(req.body)
     switch (req.body.state) {
         case "start":
             if (inst != null) {
@@ -28,22 +29,22 @@ async function setState(req, res) {
 
                     //wolfo, if your reading this please make multi-socket work. Tomorrow I will investigate making the user and cwd dynamic and stuff. I literally spent all day trying to make this work 🤣. All the best - Ender.
                     if (araratInstance.relationships.magma_cube.stateless == true) {
-                        if (araratInstance.relationships.magma_cube.images[araratInstance.magma_cube.image_group][araratInstance.magma_cube.image_index].user) {
-                            var config = { endpoint: "exec", "command": araratInstance.relationships.magma_cube.images[araratInstance.magma_cube.image_group][araratInstance.magma_cube.image_index].startup.split(" "), user: araratInstance.relationships.magma_cube.images[araratInstance.magma_cube.image_group][araratInstance.magma_cube.image_index].user }
-                            if (araratInstance.relationships.magma_cube.images[araratInstance.magma_cube.image_group][araratInstance.magma_cube.image_index].mount) {
-                                config.cwd = araratInstance.relationships.magma_cube.images[araratInstance.magma_cube.image_group][araratInstance.magma_cube.image_index].mount
+                        if (araratInstance.relationships.magma_cube.user) {
+                            var config = { endpoint: "exec", "command": araratInstance.relationships.magma_cube.entrypoint.split(" "), user: araratInstance.relationships.magma_cube.user }
+                            if (araratInstance.relationships.magma_cube.mount) {
+                                config.cwd = araratInstance.relationships.magma_cube.mount
                             }
                         }
-                    } else if (araratInstance.relationships.magma_cube.type == "n-vps" || araratInstance.relationships.magma_cube.console == "xterm") {
+                    } else if (araratInstance.type == "n-vps" || araratInstance.relationships.magma_cube.console == "xterm") {
                         var config = { endpoint: "console" }
-                    } else if (araratInstance.relationships.magma_cube.type == "kvm") {
+                    } else if (araratInstance.type == "kvm") {
                         //setup spice code
                     }
-                    console.log(araratInstance.relationships.magma_cube.images[araratInstance.magma_cube.image_group][araratInstance.magma_cube.image_index])
+                    console.log(araratInstance.relationships.magma_cube)
                     console.log(config)
                     if (araratInstance.relationships.magma_cube.stateless == true) {
                         var cons = await inst.console("console", { endpoint: "exec", raw: config })
-                        console.log(araratInstance.relationships.magma_cube.images[araratInstance.magma_cube.image_group][araratInstance.magma_cube.image_index].states.running)
+                        console.log(araratInstance.relationships.magma_cube.states.running)
                         var index = ws.add(req.params.instance, cons) - 1
                         console.log(index)
                         console.log(ws.websockets)
@@ -70,7 +71,7 @@ async function setState(req, res) {
                                 })
                             } else {
 
-                                araratInstance.relationships.magma_cube.images[araratInstance.magma_cube.image_group][araratInstance.magma_cube.image_index].states.running.forEach(sta => {
+                                araratInstance.relationships.magma_cube.states.running.forEach(sta => {
                                     if (data.toString().includes(sta)) {
 
                                         db.collection('instances').add(req.params.instance, {
@@ -101,7 +102,7 @@ async function setState(req, res) {
                                 })
                             } else {
 
-                                araratInstance.relationships.magma_cube.images[araratInstance.magma_cube.image_group][araratInstance.magma_cube.image_index].states.running.forEach(sta => {
+                                araratInstance.relationships.magma_cube.states.running.forEach(sta => {
                                     if (data.toString().includes(sta)) {
 
                                         db.collection('instances').add(req.params.instance, {
@@ -172,6 +173,18 @@ async function setState(req, res) {
                     })
                     res.send('Success')
                 } else if (inst.type() == "virtual-machine" && araratInstance.relationships.magma_cube.console == "xterm") {
+                    db.collection('instances').add(req.params.instance, {
+                        state: "Starting"
+                    })
+                    if (await inst.state() == "Stopped") {
+                        await inst.start()
+                    }
+                    var cons = await inst.console("console", { endpoint: "console" })
+                    ws.add(req.params.instance, cons)
+                    db.collection("instances").add(req.params.instance, {
+                        state: "Online"
+                    })
+                    res.send('Success')
                     //texat console
                 } else if (inst.type() == "container" && araratInstance.relationships.magma_cube.stateless == false) {
                     db.collection('instances').add(req.params.instance, {
@@ -194,6 +207,7 @@ async function setState(req, res) {
             }
             break;
         case "stop":
+            console.log('stopping')
             db.collection('instances').add(req.params.instance, {
                 state: "Stopping"
             })
@@ -201,7 +215,11 @@ async function setState(req, res) {
                 if (req.body.force == true) {
                     res.send("Success")
                     try {
-                        await inst.stop(true);
+                        await client.client.put('/1.0/instances/' + inst.name() + '/state', {
+                            "action": "stop",
+                            "force": true,
+                            "timeout": 30
+                        })
                         db.collection('instances').add(req.params.instance, {
                             state: "Offline"
                         })
@@ -211,7 +229,11 @@ async function setState(req, res) {
                 } else {
                     res.send("Success")
                     try {
-                        await inst.stop();
+                        await client.client.put('/1.0/instances/' + inst.name() + '/state', {
+                            "action": "stop",
+
+                            "timeout": 30
+                        })
                         db.collection('instances').add(req.params.instance, {
                             state: "Offline"
                         })
@@ -222,7 +244,11 @@ async function setState(req, res) {
             } else {
                 res.send("Success")
                 try {
-                    await inst.stop();
+                    await client.client.put('/1.0/instances/' + inst.name() + '/state', {
+                        "action": "stop",
+
+                        "timeout": 30
+                    })
                     db.collection('instances').add(req.params.instance, {
                         state: "Offline"
                     })
