@@ -5,19 +5,19 @@ const readline = require("readline");
     const installLXD = spawn("snap", "install lxd --channel=latest/stable".split(" "));
 
     installLXD.stdout.on('data', (data) => {
-        console.log(data)
+        console.log(data.toString())
     });
     installLXD.stderr.on('data', (data) => {
-        console.log(data)
+        console.log(data.toString())
     });
     installLXD.on("close", (code) => {
         const refreshLXD = spawn("snap", "refresh lxd --channel=latest/stable".split(" "));
         
         refreshLXD.stdout.on("data", (data) => {
-            console.log(data);
+            console.log(data.toString());
         })
         refreshLXD.stderr.on("data", (data) => {
-            console.log(data);
+            console.log(data.toString());
         })
         refreshLXD.on("close", (code) => {
             const rl = readline.createInterface({
@@ -32,7 +32,9 @@ const readline = require("readline");
                 rl.close();
 
                 const setupLXD = spawn("lxd", ["init"]);
-                
+                setupLXD.stdout.on("data", (data) => {
+                console.log(data.toString());
+})
                 setupLXD.stdin.write(" \n")
                 setupLXD.stdin.write(" \n")
                 setupLXD.stdin.write(" \n")
