@@ -79,7 +79,7 @@
 
             try {
                 console.log('connect')
-                sc = new SpiceHtml5.SpiceMainConn({ uri: 'wss://lava.enzonet.nl/api/v1/instances/<%=server%>/console/vga', screen_id: "spice-screen", password: '', onerror: spice_error, onagent: agent_connected });
+                sc = new SpiceHtml5.SpiceMainConn({ uri: '<%=address%>/api/v1/instances/<%=server%>/console/vga', screen_id: "spice-screen", password: '', onerror: spice_error, onagent: agent_connected });
             }
             catch (e) {
                 alert(e.toString());
@@ -94,7 +94,7 @@
                 DEBUG > 0 && console.log('SPICE port', event.detail.channel.portName, 'event data:', event.detail.spiceEvent);
             });
         }
-        
+
         function disconnect() {
             if (sc) {
                 sc.stop();
@@ -142,7 +142,7 @@
 
 </head>
 
-<body >
+<body>
 
     <div id="spice-area">
         <div id="spice-screen" class="spice-screen" style="height: 100%;"></div>
