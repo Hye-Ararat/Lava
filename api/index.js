@@ -19,7 +19,7 @@ router.ws('/instances/:instance/console', require('./instance/console/ws'))
 // monitor instance resources
 router.ws('/instances/:instance/monitor', require("./instance/monitor/ws"))
 // delete instance
-router.delete("/instance/:instance", require("./instance/delete"))
+router.delete("/instances/:instance", require("./instance/delete"))
 router.get('/instances/:instance/monitor', require("./instance/monitor/get"))
 router.post('/instances/:instance/state', require('./instance/state/post'))
 router.get('/instances/:instance/state', require('./instance/state/get'))
