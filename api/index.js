@@ -11,6 +11,7 @@ router.get('/network/:bridge/forwards', require('./network/forwards/get'))
 router.put("/network/:bridge/forwards/ports", require("./network/forwards/ports/put"));
 // get network bridge
 router.get('/network/:bridge', require('./network/get'))
+router.post("/network/:bridge/remotes", require("./network/remotes/post"));
 // create instance
 router.post('/instances', require('./instance/post'))
 router.post("/network", require("./network/post"))

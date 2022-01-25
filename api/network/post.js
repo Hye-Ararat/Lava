@@ -1,22 +1,32 @@
 var { client } = require("../../index");
-const { convertNetworkID } = require("../../lib/converter");
+const { convertNetworkID, convertTunnelNetworkID } = require("../../lib/converter");
 
 module.exports = async function (req, res) {
+    let config = {
+        "ipv4.nat": "true",
+        "ipv6.nat": "true",
+        "ipv4.nat.address": req.body.address.ipv4 ? req.body.address.ipv4 : "none",
+        "ipv6.nat.address": req.body.address.ipv6 ? req.body.address.ipv6 : "none",
+    }
+    if (req.body.remote.remote == true && req.body.remote.primary == false) {
+        config = {
+            "ipv4.address": "none",
+            "ipv6.address": "none",
+        }
+        config["tunnel." + convertTunnelNetworkID(req.body.remote.primaryNetwork) + ".protocol"] = "gre"
+        config["tunnel." + convertTunnelNetworkID(req.body.remote.primaryNetwork) + ".local"] = req.body.address.ipv4
+        config["tunnel." + convertTunnelNetworkID(req.body.remote.primaryNetwork) + ".remote"] = req.body.remote.address.ipv4
+    }
     try {
-        await client.createBridge(convertNetworkID(req.body.id), {
-            "ipv4.nat": "true",
-            "ipv6.nat": "true",
-            "ipv4.nat.address": req.body.address.ipv4 ? req.body.address.ipv4 : "",
-            "ipv6.nat.address": req.body.address.ipv6 ? req.body.address.ipv6 : ""
-        })
-    } catch (error){
+        await client.createBridge(convertNetworkID(req.body.id),)
+    } catch (error) {
         console.log(error)
         return res.status(500).send(error.message);
     }
     if (req.body.address.ipv4) {
         try {
             var network = await client.network(convertNetworkID(req.body.id)).createNetworkForward(req.body.address.ipv4)
-        } catch (error){
+        } catch (error) {
             console.log(error)
             return res.status(500).send(error.message);
         }
