@@ -2,11 +2,14 @@ var { client } = require("../../index");
 const { convertNetworkID, convertTunnelNetworkID } = require("../../lib/converter");
 
 module.exports = async function (req, res) {
-    let config = {
+    let config;
+    if (!req.body.remote.remote == true || req.body.remote.primary == true) {
+        config = {
         "ipv4.nat": "true",
         "ipv6.nat": "true",
         "ipv4.nat.address": req.body.address.ipv4 ? req.body.address.ipv4 : "none",
         "ipv6.nat.address": req.body.address.ipv6 ? req.body.address.ipv6 : "none",
+    }
     }
     if (req.body.remote.remote == true && req.body.remote.primary == false) {
         config = {
