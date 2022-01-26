@@ -7,14 +7,14 @@ module.exports = async function (req, res) {
         config = {
             "ipv4.nat": "true",
             "ipv6.nat": "true",
-            "ipv4.nat.address": req.body.address.ipv4 ? req.body.address.ipv4 : "none",
-            "ipv6.nat.address": req.body.address.ipv6 ? req.body.address.ipv6 : "none",
+            "ipv4.nat.address": req.body.address.ipv4 ? req.body.address.ipv4 : null,
+            "ipv6.nat.address": req.body.address.ipv6 ? req.body.address.ipv6 : null,
         }
     }
     if (req.body.remote.remote == true && req.body.remote.primary == false) {
         config = {
-            "ipv4.address": "none",
-            "ipv6.address": "none",
+            "ipv4.address": null,
+            "ipv6.address": null,
         }
         config["tunnel." + convertTunnelNetworkID(req.body.remote.primaryNetwork) + ".protocol"] = "gre"
         config["tunnel." + convertTunnelNetworkID(req.body.remote.primaryNetwork) + ".local"] = req.body.address.ipv4
