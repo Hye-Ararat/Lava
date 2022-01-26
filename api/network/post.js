@@ -2,6 +2,7 @@ var { client } = require("../../index");
 const { convertNetworkID, convertTunnelNetworkID } = require("../../lib/converter");
 
 module.exports = async function (req, res) {
+    console.log(req.body);
     let config;
     if (req.body.remote.remote != true || req.body.remote.primary == true) {
         config = {
