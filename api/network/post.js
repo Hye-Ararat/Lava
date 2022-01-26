@@ -14,8 +14,8 @@ module.exports = async function (req, res) {
     }
     if (req.body.remote.remote == true && req.body.remote.primary == false) {
         config = {
-            "ipv4.address": null,
-            "ipv6.address": null,
+            "ipv4.address": "none",
+            "ipv6.address": "none",
         }
         config["tunnel." + convertTunnelNetworkID(req.body.remote.primaryNetwork) + ".protocol"] = "gre"
         config["tunnel." + convertTunnelNetworkID(req.body.remote.primaryNetwork) + ".local"] = req.body.address.ipv4
