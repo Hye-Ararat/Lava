@@ -40,7 +40,7 @@ module.exports = async function (req, res) {
                     "mode": "pull",
                     "server": magma_cube.image_server.address,
                     "protocol": magma_cube.image_server.protocol,
-                    "alias": magma_cube.images[req.body.image].amd64,
+                    "alias": process.arch.includes("arm") ? magma_cube.images[req.body.image].arm64 : magma_cube.images[req.body.image].amd64,
                 },
                 ...instanceConfig
             })
