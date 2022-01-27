@@ -35,7 +35,7 @@ async function start(req, res, name, path) {
                     reject(error)
                 })
                 var streamifier = require('streamifier')
-    
+
                 streamifier.createReadStream(Buffer.from(req.body)).pipe(request)
             } catch (error) {
                 reject(error)
@@ -64,20 +64,26 @@ async function start(req, res, name, path) {
                     reject(error)
                 })
                 var streamifier = require('streamifier')
-    
-                streamifier.createReadStream(Buffer.from( req.body)).pipe(request)
+
+                streamifier.createReadStream(Buffer.from(req.body)).pipe(request)
             } catch (error) {
                 reject(error)
             }
         }
-       
+
 
     })
-  
+
 }
 function upload(req, res) {
     console.log('upload')
     console.log(req.body)
-    start(req,res,convertID(req.params.instance), req.query.path)
+    try {
+        start(req, res, convertID(req.params.instance), req.query.path)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send("An error occured")
+    }
+    return res.send("Success")
 }
 module.exports = upload
