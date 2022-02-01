@@ -2,7 +2,6 @@ const { client } = require("../../../..")
 const { convertNetworkID } = require("../../../../lib/converter")
 
 module.exports = async function (req, res) {
-    console.log(req)
     console.log(convertNetworkID(req.params.bridge))
     console.log(req.body)
     console.log(req.params.bridge)

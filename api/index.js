@@ -30,4 +30,7 @@ router.ws('/instances/:instance/console/vga', require('./instance/console/vga/ws
 router.get('/instances/:instance/files', require('./instance/files/get'))
 router.get('/instances/:instance/files/type', require('./instance/files/type/get'))
 router.post('/instances/:instance/files', require('./instance/files/post'))
+router.post("/instances/:instance/backups", require("./instance/backups/post"))
+router.get("/instances/:instance/backups/:backup", require("./instance/backups/get"))
+router.delete("/instances/:instance/backups/:backup", require("./instance/backups/delete"));
 module.exports = router
