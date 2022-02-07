@@ -111,3 +111,4 @@ lxd-webui.key
 .DS_Store
 cert/listen.crt
 cert/listen.key
+test.js
