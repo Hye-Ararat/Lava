@@ -29,5 +29,9 @@ module.exports = async (req, res) => {
             address.ipv6_address = ipv6;
         }
     }
-    return res.status(200).send(address);
+    if (address.ipv4_address || address.ipv6_address) {
+        return res.status(200).send(address);
+    } else {
+        return res.status(500).send("This instance has never obtained an IP address");
+    }
 }
