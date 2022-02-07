@@ -35,7 +35,9 @@ router.get("/instances/:instance/backups/:backup", require("./instance/backups/g
 router.delete("/instances/:instance/backups/:backup", require("./instance/backups/delete"));
 router.get('/instances/:instance/snapshots', require('./instance/snapshots/get'))
 router.post('/instances/:instance/snapshots', require('./instance/snapshots/post'))
-router.post('/instances/:instance/snapshots/restore', require('./instance/snapshots/restore/post'))
+router.post('/instances/:instance/snapshots/:uuid/restore', require('./instance/snapshots/restore/post'))
+router.delete('/instances/:instance/snapshots/:uuid', require('./instance/snapshots/delete'))
+router.get('/instances/:instance/network', require("./instance/network/get"));
 /**
  * System Routes
  */
