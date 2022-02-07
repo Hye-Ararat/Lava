@@ -1,5 +1,6 @@
 const { client, lxd } = require('../../../..');
 const Axios = require('axios').default
+const { convertID } = require("../../../../lib/converter");
 /**
  * 
  * @param {express.Request} req 
@@ -8,12 +9,12 @@ const Axios = require('axios').default
  * @returns 
  */
 async function getSnapshots(req, res) {
-   var inst = await client.instance(req.params.instance)
+   var inst = await client.instance(convertID(req.params.instance));
    if (inst == null) {
       res.send("Instance not found")
    } else {
-       var snapshots = await inst.restoreSnapshot(req.body.name, false)
-    res.json(snapshots)
-}
+      var snapshots = await inst.restoreSnapshot(req.params.uuid, false)
+      return res.status(200).send("Success");
+   }
 }
 module.exports = getSnapshots
