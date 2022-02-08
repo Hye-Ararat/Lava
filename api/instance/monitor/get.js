@@ -1,7 +1,7 @@
 const { client, db } = require("../../../index");
 const { convertID } = require("../../../lib/converter")
 module.exports = async function monitor(req, res) {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         try {
             const inst = await client.instance(convertID(req.params.instance))
             if (db.collection('instances').exist(req.params.instance) == false) {
