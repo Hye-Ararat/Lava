@@ -8,13 +8,20 @@ const Axios = require('axios').default
  * @returns 
  */
 async function getSnapshots(req, res) {
-   var inst = await client.instance(req.params.instance)
-   if (inst == null) {
-      res.send("Instance not found")
-   } else {
-       var snapshots = await inst.listSnapshot()
-       res.json(snapshots)
+   try {
+      var inst = await client.instance(req.params.instance)
+      if (inst == null) {
+         res.send("Instance not found")
+      } else {
+         var snapshots = await inst.listSnapshot()
+         res.json(snapshots)
+      }
+   } catch (error) {
+      console.log(error)
+      return res.status(500).send("An error occured");
    }
-    
+
+
+
 }
 module.exports = getSnapshots

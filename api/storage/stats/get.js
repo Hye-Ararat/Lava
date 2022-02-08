@@ -9,14 +9,14 @@ const Axios = require('axios').default
 module.exports = async function (req, res) {
     let err;
     try {
-        var stats = await client.client.get('/1.0/storage-pools/'+req.params.uuid+'/resources')
+        var stats = await client.client.get('/1.0/storage-pools/' + req.params.uuid + '/resources')
     } catch (error) {
-        err= error
+        err = error
         res.json({})
     }
-   if (!err) {
-    res.json(stats.metadata)
-   }
+    if (!err) {
+        res.json(stats.metadata)
+    }
 
 }
 
