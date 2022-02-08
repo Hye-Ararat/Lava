@@ -25,6 +25,7 @@ async function control(ws, req) {
                             break;
                     }
                 } catch (error) {
+                    console.log(error)
                     ws.send(JSON.stringify({ error: "Error while paring message" }))
                     ws.close()
                 }

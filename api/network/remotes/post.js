@@ -11,6 +11,7 @@ module.exports = async function (req, res) {
         try {
             await network.updateNetworkConfig(config)
         } catch (error) {
+            console.log(error)
             return res.status(500).send(error);
         }
         return res.status(200).send("Success")

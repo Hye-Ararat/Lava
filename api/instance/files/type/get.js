@@ -20,6 +20,7 @@ async function getType(req, res) {
                 resolve()
             }
         } catch (error) {
+            console.log(error)
             reject(error)
         }
 

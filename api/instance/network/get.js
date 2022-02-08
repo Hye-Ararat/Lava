@@ -8,6 +8,7 @@ module.exports = async (req, res) => {
         try {
             instance = await client.instance(convertID(req.params.instance));
         } catch (error) {
+            console.log(error)
             return res.status(500).send("An error occured while fetching the instance");
         }
         if (!instance) return res.status(404).send("Instance not found");

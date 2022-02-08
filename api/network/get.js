@@ -9,6 +9,7 @@ module.exports = async function (req, res) {
         var network = (await client.network('lxdbr0')).metadata
         res.json({ status: "Success", data: network.metadata, reason: null })
     } catch (error) {
+        console.log(error)
         res.json({ status: "Error", data: {}, reason: null })
     }
 

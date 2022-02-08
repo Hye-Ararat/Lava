@@ -58,11 +58,12 @@ module.exports = async function (req, res) {
             res.json({ status: "Error", data: {}, reason: "Instance already exists" })
         }
     } catch (error) {
+        console.log(error)
         if (error.request) {
             res.json({ status: "Error", data: {}, reason: error.request.data })
         } else {
             if (process.env.DEBUG) {
-                console.log(error)
+                
                 res.json({ status: "Error", data: {}, reason: error.message })
             } else {
                 res.json({ status: "Error", data: {}, reason: "" })

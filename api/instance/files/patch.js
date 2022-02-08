@@ -29,6 +29,7 @@ async function createFolder(req, res) {
             res.status(500).send("Failure")
         }
     } catch (error) {
+        console.log(error)
         return res.status(500).send("Failure")
     }
 

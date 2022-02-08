@@ -11,6 +11,7 @@ module.exports = async function (req, res) {
     try {
         var stats = await client.client.get('/1.0/storage-pools/' + req.params.uuid + '/resources')
     } catch (error) {
+        console.log(error)
         err = error
         res.json({})
     }

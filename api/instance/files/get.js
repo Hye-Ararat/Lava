@@ -39,6 +39,7 @@ async function download(req, res, path, name) {
 
             }
         } catch (error) {
+            console.log(error)
             reject(error)
         }
 
@@ -60,6 +61,7 @@ async function downloadfile(req, res) {
             res.json(s)
         }
     } catch (error) {
+        console.log(error)
         return res.status(500).send("An error occured");
     }
 

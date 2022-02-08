@@ -38,6 +38,7 @@ async function start(req, res, name, path) {
 
                 streamifier.createReadStream(Buffer.from(req.body)).pipe(request)
             } catch (error) {
+                console.log(error)
                 reject(error)
             }
         } else {
@@ -67,6 +68,7 @@ async function start(req, res, name, path) {
 
                 streamifier.createReadStream(Buffer.from(req.body)).pipe(request)
             } catch (error) {
+                console.log(error)
                 reject(error)
             }
         }
