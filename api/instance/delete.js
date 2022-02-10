@@ -17,5 +17,7 @@ module.exports = async function (req, res) {
         console.log(error)
         return res.status(500).send("An error occured");
     }
+    
+    return res.status(200).send("Success");
 
 }
