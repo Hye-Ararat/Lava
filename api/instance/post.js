@@ -40,7 +40,7 @@ module.exports = async function (req, res) {
                     "mode": "pull",
                     "server": magma_cube.image_server.address,
                     "protocol": magma_cube.image_server.protocol,
-                    "alias": magma_cube.images[req.body.image].amd64,
+                    "alias": process.arch.includes("arm") ? magma_cube.images[req.body.image].arm64 : magma_cube.images[req.body.image].amd64,
                 },
                 ...instanceConfig
             })
@@ -58,11 +58,12 @@ module.exports = async function (req, res) {
             res.json({ status: "Error", data: {}, reason: "Instance already exists" })
         }
     } catch (error) {
+        console.log(error)
         if (error.request) {
             res.json({ status: "Error", data: {}, reason: error.request.data })
         } else {
             if (process.env.DEBUG) {
-                console.log(error)
+                
                 res.json({ status: "Error", data: {}, reason: error.message })
             } else {
                 res.json({ status: "Error", data: {}, reason: "" })

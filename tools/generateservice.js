@@ -20,13 +20,14 @@ function generateService(s) {
     try {
         fs.writeFileSync('/etc/systemd/system/lava.service', service)
     } catch (error) {
-       console.log("Error while creating systemd service") 
+        console.log(error)
+        console.log("Error while creating systemd service")
     }
-    console.log('Created service\nStart the daemon with "systemctl daemon-reload && systemctl start lava"') 
+    console.log('Created service\nStart the daemon with "systemctl daemon-reload && systemctl start lava"')
     if (process.env.USER != 'root') {
         console.log('Must be run as root')
         return process.exit(1)
     }
- 
+
 }
 module.exports = generateService

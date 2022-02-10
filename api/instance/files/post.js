@@ -22,6 +22,7 @@ async function start(req, res, name, path) {
                     port: s.port,
                     path: encodeURI("/1.0/instances/" + name + "/files?path=" + path),
                     headers: {
+                        "X-LXD-type": "file",
                         "Content-Type": `application/octet-stream`
                     },
                 }, function (response) {
@@ -35,9 +36,10 @@ async function start(req, res, name, path) {
                     reject(error)
                 })
                 var streamifier = require('streamifier')
-    
+
                 streamifier.createReadStream(Buffer.from(req.body)).pipe(request)
             } catch (error) {
+                console.log(error)
                 reject(error)
             }
         } else {
@@ -51,6 +53,7 @@ async function start(req, res, name, path) {
                     socketPath: s.pathname,
                     path: encodeURI("/1.0/instances/" + name + "/files?path=" + path),
                     headers: {
+                        "X-LXD-type": "file",
                         "Content-Type": `application/octet-stream`
                     },
                 }, function (response) {
@@ -64,20 +67,27 @@ async function start(req, res, name, path) {
                     reject(error)
                 })
                 var streamifier = require('streamifier')
-    
-                streamifier.createReadStream(Buffer.from( req.body)).pipe(request)
+
+                streamifier.createReadStream(Buffer.from(req.body)).pipe(request)
             } catch (error) {
+                console.log(error)
                 reject(error)
             }
         }
-       
+
 
     })
-  
+
 }
 function upload(req, res) {
     console.log('upload')
     console.log(req.body)
-    start(req,res,convertID(req.params.instance), req.query.path)
+    try {
+        start(req, res, convertID(req.params.instance), req.query.path)
+    } catch (error) {
+        console.log(error)
+        return res.status(500).send("An error occured")
+    }
+    return res.send("Success")
 }
 module.exports = upload

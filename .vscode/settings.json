@@ -1,0 +1,11 @@
+{
+    "formatFiles.excludedFolders": [
+        "node_modules",
+        ".vscode",
+        ".git",
+        "dist",
+        ".chrome",
+        "views",
+        "public"
+    ]
+}
