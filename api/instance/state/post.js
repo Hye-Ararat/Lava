@@ -2,6 +2,7 @@
 const { client, ararat, ws, db } = require('../../../index')
 const { convertID } = require('../../../lib/converter')
 const { Worker } = require("worker_threads")
+const consoleMessage = require('../../../lib/consoleMessage')
 /**
  * 
  * @param {import('express').Request} req 
@@ -126,38 +127,11 @@ async function setState(req, res) {
                             })
                             var arr = ws.websockets
                             cons.operation.onmessage = async ({ data }) => {
-                                if (data == "") {
-                                    var arr = ws.websockets;
-                                    var item = ws.get(req.params.instance)
-                                    arr.splice(arr.indexOf(item), 1)
-                                    ws.set(arr)
-                                    try {
-                                        await inst.stop();
-                                    } catch {
-                                        try {
-                                            await inst.stop(true);
-                                        } catch {
-
-                                        }
-                                    }
-                                }
+                                consoleMessage(data, ws, inst)
                             }
                             ws.get(req.params.instance).ws.operation.onmessage = async ({ data }) => {
-                                if (data == "") {
-                                    var arr = ws.websockets;
-                                    var item = ws.get(req.params.instance)
-                                    arr.splice(arr.indexOf(item), 1)
-                                    ws.set(arr)
-                                    try {
-                                        await inst.stop();
-                                    } catch {
-                                        try {
-                                            await inst.stop(true);
-                                        } catch {
+                                consoleMessage(data, ws, inst)
 
-                                        }
-                                    }
-                                }
                             }
                         }
                     } else if (inst.type() == "virtual-machine" && araratInstance.relationships.magma_cube.console == "vga") {

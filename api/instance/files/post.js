@@ -22,6 +22,7 @@ async function start(req, res, name, path) {
                     port: s.port,
                     path: encodeURI("/1.0/instances/" + name + "/files?path=" + path),
                     headers: {
+                        "X-LXD-type": "file",
                         "Content-Type": `application/octet-stream`
                     },
                 }, function (response) {
@@ -52,6 +53,7 @@ async function start(req, res, name, path) {
                     socketPath: s.pathname,
                     path: encodeURI("/1.0/instances/" + name + "/files?path=" + path),
                     headers: {
+                        "X-LXD-type": "file",
                         "Content-Type": `application/octet-stream`
                     },
                 }, function (response) {

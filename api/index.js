@@ -38,6 +38,7 @@ router.post('/instances/:instance/snapshots', require('./instance/snapshots/post
 router.post('/instances/:instance/snapshots/:uuid/restore', require('./instance/snapshots/restore/post'))
 router.delete('/instances/:instance/snapshots/:uuid', require('./instance/snapshots/delete'))
 router.get('/instances/:instance/network', require("./instance/network/get"));
+router.delete('/instances/:instance/files', require('./instance/files/delete'))
 /**
  * System Routes
  */
