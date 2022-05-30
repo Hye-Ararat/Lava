@@ -73,12 +73,13 @@ async function install(ws, req) {
             ws.send("Setting Up Dependencies...")
             execSync("lxd.lxc config set core.https_address [::]:" + lxd_port, { stdio: [0, 1, 2] });
             const cert = Buffer.from(certificate, "base64").toString("ascii");
+            const newKey = Buffer.from(key, "base64").toString("ascii");
             console.log("Dependencies set up! ✅");
             console.log("");
             ws.send("Authorizing Communication...");
             fs.writeFileSync("./client.crt", cert);
+            fs.writeFileSync("./client.key", newKey);
             execSync("lxd.lxc config trust add ./client.crt --name Ararat", { stdio: [0, 1, 2] });
-            fs.rmSync("./client.crt");
             console.log("Communication authorized! ✅");
             console.log("");
             ws.send("Configuring Node...")
