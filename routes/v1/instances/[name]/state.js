@@ -1,5 +1,5 @@
 import express from "express";
-import { getState } from "../../../../lib/lxd.js";
+import { getState, LXDclient as client } from "../../../../lib/lxd.js";
 import { create, all } from "mathjs";
 
 const router = express.Router({ mergeParams: true });
@@ -11,6 +11,7 @@ math.config({
 
 router.ws("/", async (ws, req) => {
     const { name } = req.params;
+    const instance = await client.instance(name).data;
     function stateWithCpu(fast) {
         return new Promise(async (resolve, reject) => {
             const state = await getState(name);
@@ -21,6 +22,9 @@ router.ws("/", async (ws, req) => {
             let endTime = Date.now();
             let cpu2 = math.divide(state2.cpu.usage, 1e+9);
             let cpuUsage = math.multiply(math.divide(math.subtract(cpu2, cpu1), math.subtract(endTime, startTime)), 100000);
+            if (Object.keys(instance.metadata.config).includes("limits.cpu")) {
+                cpuUsage = cpuUsage / parseInt(instance.metadata.config["limits.cpu"])
+            }
             resolve({
                 ...state2,
                 cpu: {
