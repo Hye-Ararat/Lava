@@ -81,6 +81,8 @@ if (cluster.isPrimary) {
             process.exit(0);
         })
 
+    } else {
+        start()
     }
     function start() {
         if (process.platform == "darwin") {
