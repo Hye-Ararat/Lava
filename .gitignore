@@ -109,3 +109,10 @@ lxd-webui.crt
 lxd-webui.csr
 lxd-webui.key
 .DS_Store
+client.crt
+client.key
+macOS/image.img
+macOS/README 2
+macOS/README 3
+macOS/README
+macOS/README 4
