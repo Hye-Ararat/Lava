@@ -155,13 +155,16 @@ async function install(ws, req) {
                                 configscreen.stdout.on("data", (data) => {
                                     if (data.toString().includes("(initramfs)") && !runInit) {
                                         runInit = true;
-                                        ws.send("Configuring N-VPS...");
-                                        configscreen.stdin.write("mkdir /mnt\n");
-                                        configscreen.stdin.write("mount /dev/vda /mnt\n");
-                                        configscreen.stdin.write("chroot /mnt\n");
-                                        configscreen.stdin.write("echo 'root:root' | chpasswd\n");
-                                        ws.send("Setting up N-VPS networking...");
-                                        configscreen.stdin.write(`cat <<EOF > /etc/netplan/01-dhcp.yaml
+                                        setTimeout(() => {
+
+
+                                            ws.send("Configuring N-VPS...");
+                                            configscreen.stdin.write("mkdir /mnt\n");
+                                            configscreen.stdin.write("mount /dev/vda /mnt\n");
+                                            configscreen.stdin.write("chroot /mnt\n");
+                                            configscreen.stdin.write("echo 'root:root' | chpasswd\n");
+                                            ws.send("Setting up N-VPS networking...");
+                                            configscreen.stdin.write(`cat <<EOF > /etc/netplan/01-dhcp.yaml
 network:
     renderer: networkd
     ethernets:
@@ -169,9 +172,10 @@ network:
             dhcp4: true
     version: 2
 EOF\n`);
-                                        ws.send("Finishing up N-VPS initialization...");
-                                        configscreen.stdin.write("exit\n");
-                                        configscreen.stdin.write("umount /dev/vda\n");
+                                            ws.send("Finishing up N-VPS initialization...");
+                                            configscreen.stdin.write("exit\n");
+                                            configscreen.stdin.write("umount /dev/vda\n");
+                                        }, 5000);
                                         setTimeout(() => {
                                             configproc.kill()
                                             ws.send("Getting N-VPS ready for dependency installation...");
