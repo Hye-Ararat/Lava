@@ -7,7 +7,7 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "express-ws": "^5.0.2",
-    "hyexd": "^0.0.34",
+    "hyexd": "^0.0.45",
     "lark-websocket": "^0.0.5",
     "lxd-sftp-server": "^1.0.2",
     "mathjs": "^10.4.3",
