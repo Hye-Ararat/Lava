@@ -127,7 +127,7 @@ if (cluster.isPrimary) {
         for (let i = 0; i < 4; i++) {
             cluster.fork();
         }
-        import("./lib/consoleHandler.js").then((e) => {
+        import("./lib/eventHandler.js").then((e) => {
             e.listen();
         })
         const unixServer = net.createServer(socket => {
