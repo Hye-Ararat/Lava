@@ -39,11 +39,11 @@ export default async () => {
                             } catch (error) {
                                 console.log(error);
                             }
-                            socks[0].on("close", () => {
+                            socks["0"].on("close", () => {
                                 let updInst = await client.instance(name).data;
                                 if (updInst.metadata.status == "Running") {
                                     await client.instance(name).updateState("stop");
-                                    socks[1].close();
+                                    socks["control"].close();
                                 }
                             })
 
