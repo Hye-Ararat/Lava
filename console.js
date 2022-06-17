@@ -25,10 +25,37 @@ export default async () => {
         if (!get(name)) {
             let socks;
             if (inst.metadata.status == "Running") {
-                try {
-                    socks = await client.instance(name).console("console");
-                } catch (error) {
-                    console.log(error);
+                if (inst.metadata.config["image.variant"]) {
+                    if (inst.metadata.config["image.variant"] == "stateless") {
+                        if (inst.metadata["user.startup"]) {
+                            let user;
+                            let wd;
+                            if (inst.metadata["user.user"]) user = parseInt(inst.metadata["user.user"]);
+                            if (inst.metadata["image.user"]) user = parseInt(inst.metadata["image.user"]);
+                            if (inst.metadata["user.working_dir"]) wd = inst.metadata["user.working_dir"];
+                            if (inst.metadata["image.working_dir"]) wd = inst.metadata["image.working_dir"];
+                            try {
+                                socks = await client.instance(name).exec(inst.metadata["user.startup"].split(" "), user, wd)
+                            } catch (error) {
+                                console.log(error);
+                            }
+                            socks[0].on("close", () => {
+                                let updInst = await client.instance(name).data;
+                                if (updInst.metadata.status == "Running") {
+                                    await client.instance(name).updateState("stop");
+                                    socks[1].close();
+                                }
+                            })
+
+                        }
+                    }
+                }
+                if (!socks) {
+                    try {
+                        socks = await client.instance(name).console("console");
+                    } catch (error) {
+                        console.log(error)
+                    }
                 }
                 add(name, socks.stdin, socks.stdout);
                 ready();
