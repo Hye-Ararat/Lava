@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
     try {
         fileData = await axios.get(`/sftp?instance=${name}&path=${encodeURI(path)}`, options)
     } catch (e) {
-        console.log(e);
+        console.log(e.rawPacket);
     }
     Object.keys(fileData.headers).forEach(key => {
         res.setHeader(key, fileData.headers[key]);
