@@ -170,5 +170,6 @@ if (cluster.isPrimary) {
     }
 
 } else {
-    (await (import("./index.js"))).default();
+    console.log("INSTANCE STARTED")
+        (await (import("./index.js"))).default();
 }
