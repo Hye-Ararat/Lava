@@ -32,6 +32,7 @@ router.get("/", (req, res) => {
             res.end();
         })
         response.on("error", data => {
+            console.log(data);
             res.status(500).send(data);
         });
     });
