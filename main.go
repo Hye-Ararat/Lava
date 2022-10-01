@@ -57,6 +57,7 @@ func server(c net.Conn, con lxd.InstanceServer) {
 				t := http.Response{
 					StatusCode: 404,
 					Body:       ioutil.NopCloser(bytes.NewBufferString("File Does Not Exist")),
+					Proto: 	"HTTP/1.1",
 				}
 				t.Write(c)
 				c.Close()
@@ -79,6 +80,8 @@ func server(c net.Conn, con lxd.InstanceServer) {
 					Header: http.Header{
 						"type": []string{fileType},
 					},
+					Proto: 	"HTTP/1.1",
+					
 				}
 				t.Write(c)
 				c.Close()
