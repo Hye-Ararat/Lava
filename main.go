@@ -35,7 +35,7 @@ func server(c net.Conn, con lxd.InstanceServer) {
 			fmt.Printf(string(err.Error()))
 			return
 		}
-
+		fmt.Printf("Request: %s %s\n", req.Method, req.URL.Path)
 		switch req.URL.Path {
 		case "/sftp":
 
