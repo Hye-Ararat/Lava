@@ -38,7 +38,6 @@ func server(c net.Conn, con lxd.InstanceServer) {
 
 		switch req.URL.Path {
 		case "/sftp":
-
 			connection, err := con.GetInstanceFileSFTPConn(req.URL.Query().Get("instance"))
 			if err != nil {
 				panic(err)
@@ -54,10 +53,13 @@ func server(c net.Conn, con lxd.InstanceServer) {
 			fileType := "file"
 			stat, err := client.Lstat(path)
 			if err != nil {
-				t := http.Response{
-					StatusCode: 404,
+				t := &http.Response{
 					Body:       ioutil.NopCloser(bytes.NewBufferString("File Does Not Exist")),
-				}
+					Proto: 	"HTTP/1.1",
+					ProtoMajor: 1,
+					ProtoMinor: 1,
+					StatusCode: 404,
+					Status: "404 Not Found",				}
 				t.Write(c)
 				c.Close()
 				return
@@ -74,12 +76,18 @@ func server(c net.Conn, con lxd.InstanceServer) {
 					panic(err)
 				}
 				defer file.Close()
-				t := http.Response{
+				t := &http.Response{
 					Body: file,
 					Header: http.Header{
 						"type": []string{fileType},
 					},
+					Proto: 	"HTTP/1.1",
+					ProtoMajor: 1,
+					ProtoMinor: 1,
+					StatusCode: 200,
+					Status: "200 OK",
 				}
+				fmt.Printf("sftp")
 				t.Write(c)
 				c.Close()
 				return
@@ -98,11 +106,16 @@ func server(c net.Conn, con lxd.InstanceServer) {
 					panic(err)
 				}
 
-				t := http.Response{
+				t := &http.Response{
 					Body: ioutil.NopCloser(bytes.NewReader([]byte(target))),
 					Header: http.Header{
 						"type": []string{fileType},
 					},
+					Proto: 	"HTTP/1.1",
+					ProtoMajor: 1,
+					ProtoMinor: 1,
+					StatusCode: 200,
+					Status: "200 OK",
 				}
 				t.Write(c)
 				c.Close()
@@ -133,12 +146,19 @@ func server(c net.Conn, con lxd.InstanceServer) {
 				if err != nil {
 					panic(err)
 				}
-				t := http.Response{
+				t := &http.Response{
 					Body: ioutil.NopCloser(bytes.NewReader(json)),
 					Header: http.Header{
 						"type": []string{fileType},
 					},
+					Proto: 	"HTTP/1.1",
+					ProtoMajor: 1,
+					ProtoMinor: 1,
+					StatusCode: 200,
+					Status: "200 OK",
 				}
+				
+
 				t.Write(c)
 				c.Close()
 				return
@@ -152,8 +172,13 @@ func server(c net.Conn, con lxd.InstanceServer) {
 			if err != nil {
 				fmt.Print(string(err.Error()))
 			}
-			t := http.Response{
+			t := &http.Response{
 				Body: ioutil.NopCloser(bytes.NewReader(json)),
+				Proto: 	"HTTP/1.1",
+				ProtoMajor: 1,
+				ProtoMinor: 1,
+				StatusCode: 200,
+				Status: "200 OK",
 			}
 			t.Write(c)
 			c.Close()
