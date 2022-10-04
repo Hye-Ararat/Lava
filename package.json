@@ -7,7 +7,7 @@
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
     "express-ws": "^5.0.2",
-    "hyexd": "^0.0.45",
+    "hyexd": "^0.0.50",
     "lark-websocket": "^0.0.5",
     "lxd-sftp-server": "^1.0.2",
     "mathjs": "^10.4.3",
@@ -15,6 +15,7 @@
     "node-forge": "^1.3.1",
     "node-tcp-proxy": "^0.0.27",
     "pretty-bytes": "^6.0.0",
+    "ssh2": "^1.11.0",
     "tslib": "^2.3.1",
     "udp-proxy": "^1.2.0",
     "yargs": "^17.4.0"
