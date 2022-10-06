@@ -14,8 +14,10 @@ export default async () => {
         let logs;
         const inst = await client.instance(name).data;
         try {
-            logs = await client.instance(name).consoleLog();
-            ws.send(logs);
+            if (inst.metadata.config["image.variant"] != "stateless") {
+                logs = await client.instance(name).consoleLog();
+                ws.send(logs);
+            }
         } catch (error) {
 
         }
@@ -34,8 +36,22 @@ export default async () => {
                             if (inst.metadata.config["image.user"]) user = parseInt(inst.metadata.config["image.user"]);
                             if (inst.metadata.config["user.working_dir"]) wd = inst.metadata.config["user.working_dir"];
                             if (inst.metadata.config["image.working_dir"]) wd = inst.metadata.config["image.working_dir"];
+                            let environment = {}
+                            Object.keys(inst.metadata.config).forEach((key) => {
+                                if (key.startsWith("environment.")) {
+                                    environment[key.replace("environment.", "")] = inst.metadata.config[key];
+                                }
+                            })
+                            let startup = inst.metadata.config["user.startup"].split(" ");
+                            startup = startup.map((arg) => {
+                                if (arg.startsWith("$")) {
+                                    return environment[arg.replace("$", "")];
+                                } else {
+                                    return arg;
+                                }
+                            })
                             try {
-                                socks = await client.instance(name).exec(inst.metadata.config["user.startup"].split(" "), user, wd)
+                                socks = await client.instance(name).exec(startup, user, wd)
                             } catch (error) {
                                 console.log(error);
                             }
@@ -62,7 +78,6 @@ export default async () => {
                 add(name, socks.stdin, socks.stdout);
                 ready();
             } else {
-                ws.send("Instance offline");
                 const interval = setInterval(() => {
                     if (get(name)) {
                         ready();
@@ -87,7 +102,6 @@ export default async () => {
             get(name).socket.stdout.on("close", () => {
                 ws.onmessage = () => { };
                 remove(name);
-                ws.send("Instance offline");
                 const interval = setInterval(() => {
                     if (get(name)) {
                         ready();
