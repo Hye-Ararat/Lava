@@ -33,9 +33,7 @@ export default async () => {
                             let user;
                             let wd;
                             if (inst.metadata.config["user.user"]) user = parseInt(inst.metadata.config["user.user"]);
-                            if (inst.metadata.config["image.user"]) user = parseInt(inst.metadata.config["image.user"]);
                             if (inst.metadata.config["user.working_dir"]) wd = inst.metadata.config["user.working_dir"];
-                            if (inst.metadata.config["image.working_dir"]) wd = inst.metadata.config["image.working_dir"];
                             let environment = {}
                             Object.keys(inst.metadata.config).forEach((key) => {
                                 if (key.startsWith("environment.")) {
