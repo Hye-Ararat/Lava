@@ -91,7 +91,7 @@ setTimeout(async () => {
         e.kill();
         process.exit(0);
     }
-    waitDone(startOperation.metadata.id);
+    await waitDone(startOperation.metadata.id);
     console.log("TEST INSTANCE STARTED");
     console.log("STOPPING TEST INSTANCE");
     let stopOperation;
@@ -103,7 +103,7 @@ setTimeout(async () => {
         e.kill();
         process.exit(0);
     }
-    waitDone(stopOperation.metadata.id);
+    await waitDone(stopOperation.metadata.id);
     console.log("TEST INSTANCE STOPPED");
     console.log("All Tests Completed Successfully without hanging");
     e.kill();
