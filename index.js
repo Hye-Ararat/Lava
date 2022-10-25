@@ -10,5 +10,5 @@ export default async () => {
     //spawn("./Hye_Lava");
     const apiRouter = (await import("./routes/apiRouter.js"));
     app.use("/", apiRouter.default);
-    app.listen(3001);
+    app.listen(process.env.PORT ? parseInt(process.env.PORT) : 3000);
 };

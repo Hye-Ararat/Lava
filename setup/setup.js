@@ -20,7 +20,7 @@ const app = express();
 expressWs(app);
 
 app.ws("/", install)
-app.listen(3001);
+app.listen(argv.port ? argv.port : 3000);
 
 async function install(ws, req) {
     let certificate;
