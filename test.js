@@ -75,7 +75,7 @@ setTimeout(async () => {
     consoleSock.on("open", () => {
         console.log("CONSOLE SOCKET OPENED")
     });
-    consoleSock.on("message", (data) => {
+    consoleSock.on("data", (data) => {
         console.log("[TEST INSTANCE CONSOLE]", data.toString());
     });
     console.log("GETTING LIST OF FILES");
