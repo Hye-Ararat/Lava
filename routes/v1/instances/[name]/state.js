@@ -1,6 +1,7 @@
 import express from "express";
 import { getState, LXDclient as client } from "../../../../lib/lxd.js";
 import { create, all } from "mathjs";
+import axios from "axios";
 
 const router = express.Router({ mergeParams: true });
 const math = create(all)
@@ -11,6 +12,16 @@ math.config({
 
 router.ws("/", async (ws, req) => {
     const { name } = req.params;
+    let authorization = req.headers.authorization;
+    let permissions = await axios.get(process.env.PANEL_URL + "/api/v1/instances/" + name + "/permissions", {
+        headers: {
+            Authorization: authorization
+        }
+    })
+    permissions = permissions.data;
+    if (!permissions.includes("view-state_instance")) {
+        return ws.close();
+    }
     const instance = await client.instance(name).data;
     function stateWithCpu(fast) {
         return new Promise(async (resolve, reject) => {

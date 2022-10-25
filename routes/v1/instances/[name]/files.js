@@ -1,14 +1,23 @@
+import axios from "axios";
 import express from "express";
 import http from "http";
 
 const router = express.Router({ mergeParams: true });
 
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
     const { name } = req.params;
     const { path } = req.query;
     const authorization = req.headers.authorization;
-
+    let permissions = await axios.get(process.env.PANEL_URL + "/api/v1/instances/" + name + "/permissions", {
+        headers: {
+            Authorization: authorization
+        }
+    })
+    permissions = permissions.data;
+    if (!permissions.includes("read-files_instance")) {
+        return res.status(401).send("Unauthorized");
+    }
     const options = {
         socketPath: './lava.sock',
         path: `/sftp?instance=${name}&path=${encodeURI(path)}`,
