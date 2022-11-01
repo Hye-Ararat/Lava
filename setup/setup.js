@@ -12,15 +12,35 @@ import udpProxy from "udp-proxy";
 
 const argv = yargs(hideBin(process.argv)).argv;
 
-console.log("Thanks for choosing Hye Ararat!");
-console.log("")
-console.log("✅ Ready! Please press continue on the Ararat panel");
-
 const app = express();
 expressWs(app);
 
 app.ws("/", install)
-app.listen(argv.port ? argv.port : 3000);
+if ("ssl" in argv) {
+    app.listen(3001);
+} else {
+    app.listen(argv.port ? argv.port : 3001)
+}
+
+if ("ssl" in argv) {
+    execSync("apt-get -y update", { stdio: [0, 1, 2] });
+    execSync("apt-get -y install nginx", { stdio: [0, 1, 2] });
+    execSync("apt-get -y install certbot", { stdio: [0, 1, 2] });
+    execSync("apt-get -y install python3-certbot-nginx", { stdio: [0, 1, 2] });
+    execSync('wget -O /etc/nginx/sites-enabled/Lava.conf https://raw.githubusercontent.com/Hye-Ararat/Lava/master/Lava.conf', { stdio: [0, 1, 2] });
+    let conf = fs.readFileSync("/etc/nginx/sites-enabled/Lava.conf", "utf8");
+    conf = conf.replaceAll("example.com", `${argv.address}`);
+    fs.writeFileSync("/etc/nginx/sites-enabled/Lava.conf", conf);
+    execSync(`sudo certbot --nginx -d ${argv.address} --agree-tos --register-unsafely-without-email -n`, { stdio: [0, 1, 2] });
+    let conf2 = fs.readFileSync("/etc/nginx/sites-enabled/Lava.conf", "utf8");
+    conf2 = conf2.replaceAll("443", `${argv.port}`);
+    fs.writeFileSync("/etc/nginx/sites-enabled/Lava.conf", conf2);
+    execSync('systemctl restart nginx', { stdio: [0, 1, 2] });
+}
+
+console.log("Thanks for choosing Hye Ararat!");
+console.log("")
+console.log("✅ Ready! Please press continue on the Ararat panel");
 
 async function install(ws, req) {
     let certificate;
@@ -102,7 +122,11 @@ async function install(ws, req) {
                 config += `SSL_KEY_PATH=${argv.ssl_key_path}\n`;
             }
             if ("port" in argv) {
-                config += `PORT=${argv.port}\n`;
+                if ("ssl" in argv) {
+                    config += `PORT=3001\n`;
+                } else {
+                    config += `PORT=${argv.port}\n`;
+                }
             }
             if ("panel_url" in argv) {
                 config += `PANEL_URL=${argv.panel_url}\n`;
@@ -248,7 +272,11 @@ EOF\n`);
                                                                                             config += `SSL_KEY_PATH=${argv.ssl_key_path}\n`;
                                                                                         }
                                                                                         if ("port" in argv) {
-                                                                                            config += `PORT=${argv.port}\n`;
+                                                                                            if ("ssl" in argv) {
+                                                                                                config += `PORT=3001\n`;
+                                                                                            } else {
+                                                                                                config += `PORT=${argv.port}\n`;
+                                                                                            }
                                                                                         }
                                                                                         if ("panel_url" in argv) {
                                                                                             config += `PANEL_URL=${argv.panel_url}\n`;
