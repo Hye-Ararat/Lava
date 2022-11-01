@@ -16,7 +16,11 @@ const app = express();
 expressWs(app);
 
 app.ws("/", install)
-app.listen(3001);
+if ("ssl" in argv) {
+    app.listen(3001);
+} else {
+    app.listen(argv.port ? argv.port : 3001)
+}
 
 if ("ssl" in argv) {
     execSync("apt-get -y update", { stdio: [0, 1, 2] });
@@ -118,7 +122,11 @@ async function install(ws, req) {
                 config += `SSL_KEY_PATH=${argv.ssl_key_path}\n`;
             }
             if ("port" in argv) {
-                config += `PORT=3001\n`;
+                if ("ssl" in argv) {
+                    config += `PORT=3001\n`;
+                } else {
+                    config += `PORT=${argv.port}\n`;
+                }
             }
             if ("panel_url" in argv) {
                 config += `PANEL_URL=${argv.panel_url}\n`;
@@ -264,7 +272,11 @@ EOF\n`);
                                                                                             config += `SSL_KEY_PATH=${argv.ssl_key_path}\n`;
                                                                                         }
                                                                                         if ("port" in argv) {
-                                                                                            config += `PORT=3001\n`;
+                                                                                            if ("ssl" in argv) {
+                                                                                                config += `PORT=3001\n`;
+                                                                                            } else {
+                                                                                                config += `PORT=${argv.port}\n`;
+                                                                                            }
                                                                                         }
                                                                                         if ("panel_url" in argv) {
                                                                                             config += `PANEL_URL=${argv.panel_url}\n`;
