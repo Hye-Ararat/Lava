@@ -32,7 +32,7 @@ if ("ssl" in argv) {
     conf = conf.replaceAll("example.com", `${argv.address}`);
     conf = conf.replaceAll("3000", `${argv.port}`)
     fs.writeFileSync("/etc/nginx/sites-enabled/ararat.conf", conf);
-    execSync(`sudo certbot --nginx -d ${domain.value} --agree-tos --no-redirect --register-unsafely-without-email -n`, { stdio: [0, 1, 2] });
+    execSync(`sudo certbot certonly --nginx -d ${argv.address} --agree-tos --register-unsafely-without-email -n`, { stdio: [0, 1, 2] });
     execSync('systemctl restart nginx', { stdio: [0, 1, 2] });
 }
 
