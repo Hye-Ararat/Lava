@@ -24,12 +24,13 @@ if ("ssl" in argv) {
     execSync("apt-get -y install certbot", { stdio: [0, 1, 2] });
     execSync("apt-get -y install python3-certbot-nginx", { stdio: [0, 1, 2] });
     execSync('wget -O /etc/nginx/sites-enabled/Lava.conf https://raw.githubusercontent.com/Hye-Ararat/Lava/master/Lava.conf', { stdio: [0, 1, 2] });
-    let conf = fs.readFileSync("/etc/nginx/sites-enabled/ararat.conf", "utf8");
+    let conf = fs.readFileSync("/etc/nginx/sites-enabled/Lava.conf", "utf8");
     conf = conf.replaceAll("example.com", `${argv.address}`);
-    fs.writeFileSync("/etc/nginx/sites-enabled/ararat.conf", conf);
+    fs.writeFileSync("/etc/nginx/sites-enabled/Lava.conf", conf);
     execSync(`sudo certbot --nginx -d ${argv.address} --agree-tos --register-unsafely-without-email -n`, { stdio: [0, 1, 2] });
-    let conf2 = fs.readFileSync("/etc/nginx/sites-enabled/ararat.conf", "utf8");
+    let conf2 = fs.readFileSync("/etc/nginx/sites-enabled/Lava.conf", "utf8");
     conf2 = conf2.replaceAll("443", `${argv.port}`);
+    fs.writeFileSync("/etc/nginx/sites-enabled/Lava.conf", conf2);
     execSync('systemctl restart nginx', { stdio: [0, 1, 2] });
 }
 
