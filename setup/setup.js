@@ -20,7 +20,21 @@ const app = express();
 expressWs(app);
 
 app.ws("/", install)
-app.listen(argv.port ? argv.port : 3000);
+app.listen(3001);
+
+if ("ssl" in argv) {
+    execSync("apt-get -y update", { stdio: [0, 1, 2] });
+    execSync("apt-get -y install nginx", { stdio: [0, 1, 2] });
+    execSync("apt-get -y install certbot", { stdio: [0, 1, 2] });
+    execSync("apt-get -y install python3-certbot-nginx", { stdio: [0, 1, 2] });
+    execSync('wget -O /etc/nginx/sites-enabled/Lava.conf https://raw.githubusercontent.com/Hye-Ararat/Lava/master/Lava.conf', { stdio: [0, 1, 2] });
+    let conf = fs.readFileSync("/etc/nginx/sites-enabled/ararat.conf", "utf8");
+    conf = conf.replaceAll("example.com", `${argv.address}`);
+    conf = conf.replaceAll("3000", `${argv.port}`)
+    fs.writeFileSync("/etc/nginx/sites-enabled/ararat.conf", conf);
+    execSync(`sudo certbot --nginx -d ${domain.value} --agree-tos --no-redirect --register-unsafely-without-email -n`, { stdio: [0, 1, 2] });
+    execSync('systemctl restart nginx', { stdio: [0, 1, 2] });
+}
 
 async function install(ws, req) {
     let certificate;
@@ -102,7 +116,7 @@ async function install(ws, req) {
                 config += `SSL_KEY_PATH=${argv.ssl_key_path}\n`;
             }
             if ("port" in argv) {
-                config += `PORT=${argv.port}\n`;
+                config += `PORT=3001\n`;
             }
             if ("panel_url" in argv) {
                 config += `PANEL_URL=${argv.panel_url}\n`;
@@ -248,7 +262,7 @@ EOF\n`);
                                                                                             config += `SSL_KEY_PATH=${argv.ssl_key_path}\n`;
                                                                                         }
                                                                                         if ("port" in argv) {
-                                                                                            config += `PORT=${argv.port}\n`;
+                                                                                            config += `PORT=3001\n`;
                                                                                         }
                                                                                         if ("panel_url" in argv) {
                                                                                             config += `PANEL_URL=${argv.panel_url}\n`;
