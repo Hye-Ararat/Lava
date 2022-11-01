@@ -12,10 +12,6 @@ import udpProxy from "udp-proxy";
 
 const argv = yargs(hideBin(process.argv)).argv;
 
-console.log("Thanks for choosing Hye Ararat!");
-console.log("")
-console.log("✅ Ready! Please press continue on the Ararat panel");
-
 const app = express();
 expressWs(app);
 
@@ -30,11 +26,16 @@ if ("ssl" in argv) {
     execSync('wget -O /etc/nginx/sites-enabled/Lava.conf https://raw.githubusercontent.com/Hye-Ararat/Lava/master/Lava.conf', { stdio: [0, 1, 2] });
     let conf = fs.readFileSync("/etc/nginx/sites-enabled/ararat.conf", "utf8");
     conf = conf.replaceAll("example.com", `${argv.address}`);
-    conf = conf.replaceAll("3000", `${argv.port}`)
     fs.writeFileSync("/etc/nginx/sites-enabled/ararat.conf", conf);
-    execSync(`sudo certbot certonly --nginx -d ${argv.address} --agree-tos --register-unsafely-without-email -n`, { stdio: [0, 1, 2] });
+    execSync(`sudo certbot --nginx -d ${argv.address} --agree-tos --register-unsafely-without-email -n`, { stdio: [0, 1, 2] });
+    let conf2 = fs.readFileSync("/etc/nginx/sites-enabled/ararat.conf", "utf8");
+    conf2 = conf2.replaceAll("443", `${argv.port}`);
     execSync('systemctl restart nginx', { stdio: [0, 1, 2] });
 }
+
+console.log("Thanks for choosing Hye Ararat!");
+console.log("")
+console.log("✅ Ready! Please press continue on the Ararat panel");
 
 async function install(ws, req) {
     let certificate;
