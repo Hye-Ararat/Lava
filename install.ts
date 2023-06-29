@@ -25,5 +25,5 @@ app.ws("/install", (ws: any, req: any) => {
 })
 
 app.listen(3001, () => {
-    console.log("✅ Hye Lava is ready to be installed. Please press continue in Hye Ararat.")
+    console.log("✅ Hye Lava is ready to be installed. Please press next in Hye Ararat.")
 })
