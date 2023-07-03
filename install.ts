@@ -1,26 +1,45 @@
+import { execSync } from "child_process";
+import { connectUnix } from "js-lxd";
+
 const express = require("express");
 const app = express();
 require("express-ws")(app);
 
-app.ws("/install", (ws: any, req: any) => {
-        console.log("✅ Connection Established")
-        console.log("⬇️ Installing LXD...")
-        ws.send(JSON.stringify(
-            {
-                status: "Installing LXD...",
-                percent: 1,
-                image: "https://linuxcontainers.org/lxd/docs/latest/_images/containers.png",
-            }
-        ));
-        setTimeout(() => {
-            ws.send(JSON.stringify(
-                {
-                    status: "Installing LXD...",
-                    percent: 2,
-                    image: "https://linuxcontainers.org/lxd/docs/latest/_images/containers.png",
-                }
-            ));
-        }, 1500)
+app.ws("/install", async (ws: any, req: any) => {
+    console.log("✅ Connection Established")
+    console.log("⬇️ Installing LXD...")
+    ws.send(JSON.stringify(
+        {
+            status: "Installing LXD...",
+            percent: 33,
+            image: "https://linuxcontainers.org/lxd/docs/latest/_images/containers.png",
+        }
+    ));
+    execSync("snap install lxd --channel=latest/stable", { stdio: "inherit" })
+    ws.send(JSON.stringify(
+        {
+            status: "Configuring LXD...",
+            percent: 67,
+            image: "https://linuxcontainers.org/lxd/docs/latest/_images/containers.png",
+        }
+    ));
+    console.log("⚙️ Configuring LXD...")
+    let lxdClient = connectUnix("/var/snap/lxd/common/lxd/unix.socket");
+    let e = await lxdClient.patch("", {
+        "config": {
+            "core.https_address": "[::]:8443",
+            "oidc.client.id": "lxd",
+            "oidc.issuer": "http://192.168.1.133:3000/oidc"
+        }
+    });
+    ws.send(JSON.stringify(
+        {
+            status: "Setup Complete!",
+            percent: 100,
+            image: "https://linuxcontainers.org/lxd/docs/latest/_images/containers.png",
+        }
+    ));
+    console.log("Setup Complete!")
 
 })
 
