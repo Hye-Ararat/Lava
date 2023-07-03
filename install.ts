@@ -6,6 +6,10 @@ const app = express();
 require("express-ws")(app);
 
 app.ws("/install", async (ws: any, req: any) => {
+    let url;
+    ws.on("message", (msg: any) => {
+        url = msg;
+    })
     console.log("✅ Connection Established")
     console.log("⬇️ Installing LXD...")
     ws.send(JSON.stringify(
@@ -29,7 +33,7 @@ app.ws("/install", async (ws: any, req: any) => {
         "config": {
             "core.https_address": "[::]:8443",
             "oidc.client.id": "lxd",
-            "oidc.issuer": "http://192.168.1.133:3000/oidc"
+            "oidc.issuer": `${url}/oidc`
         }
     });
     ws.send(JSON.stringify(
