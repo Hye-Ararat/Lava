@@ -73,8 +73,10 @@ eventHandler(sockets);
             try {
                 let number = sockets[req.query.secret].connections;
                 if (number == 1) {
+                    if (!sockets[req.query.secret].stateless) {
                     sockets[req.query.secret].socket.close();
                     delete sockets[req.query.secret];
+                    }
                 } else {
                     sockets[req.query.secret].connections -= 1;
                 }

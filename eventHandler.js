@@ -37,6 +37,7 @@ export function listen(sockets) {
                                 console.log(error);
                             }
                             socks["stdout"].addEventListener("message", async (dat) => {
+                                console.log(dat.data.toString())
                                 if (dat.data == "") {
                                     let updInst = await client.instance(JSON.parse(msg).metadata.context.instance).data;
                                     if (updInst.metadata.status == "Running") {
@@ -71,11 +72,13 @@ export function listen(sockets) {
                 console.log(secretIn)
                 sockets[secretOut] = {
                     connections: 0,
-                    socket: socks["stdout"]
+                    socket: socks["stdout"],
+                    stateless: true
                 }
                 sockets[secretIn] = {
                     connections: 0,
-                    socket: socks["stdin"]
+                    socket: socks["stdin"],
+                    stateless: true
                 }
                 /*global.sockets.push({
                     name: JSON.parse(msg).metadata.context.instance,
