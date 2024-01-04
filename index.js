@@ -3,8 +3,11 @@ import expressWs from "express-ws";
 import ws from "ws"
 import { listen as eventHandler } from "./eventHandler.js";
 import { LXDclient } from "./incus.js";
+import { exec, execSync, spawn } from "child_process";
+import cors from "cors";
 const app = express();
 expressWs(app)
+app.use(cors())
 function openWebsocket(path, access_token, url) {
     var u = new URL(url);
     return new ws.WebSocket("wss://" + u.host + "/1.0" + path, {
@@ -17,6 +20,73 @@ function openWebsocket(path, access_token, url) {
 }
 
 //@ts-expect-error
+let sftpSockets = {};
+app.ws("/instances/:instance/files/unzip", async (ws, req) => {
+    let path = req.query.path;
+    let instance = req.params.instance;
+    console.log(`unzip ${path}`)
+    const instanceData = (await LXDclient.instance(instance).data).metadata;
+    let instanceUser = undefined;
+    if (instanceData.expanded_config["user.stateless-user"]) {
+        instanceUser = instanceData.expanded_config["user.stateless-user"]
+    }
+    const unzip = await LXDclient.instance(instance).exec(`unzip ${path}`.split(" "), parseInt(instanceUser), path.split("/").slice(0, -1).join("/"));
+    unzip["stdout"].addEventListener("message", (data) => {
+        console.log(data.data.toString());
+        ws.send(data.data.toString())
+    });
+    unzip["stdin"].addEventListener("message", (data) => {
+        console.log(data.data.toString());
+        ws.send(data.data.toString())
+    })
+})
+app.get("/instances/:instance/sftp", async (req, res) => {
+    let sftp = spawn("incus", `file mount ${req.params.instance} --listen 23.26.226.247:0`.split(" "))
+    let connString = null;
+    let login = null;
+    let password = null;
+    let sent = false;
+    if (sftpSockets[req.params.instance]) {
+        if (!sent) {
+        res.json(sftpSockets[req.params.instance])
+        sent = true;
+        }
+        return;
+    }
+    sftp.stdout.on("data", (data) => {
+        if (data.toString().includes("SSH SFTP listening on ")) {
+            connString = data.toString().split("SSH SFTP listening on ")[1].replace("\n", "").split("Login")[0];
+        } 
+       if (data.toString().includes("Login with")) {
+        login = data.toString().split(`"`)[1];
+        password = data.toString().split(`"`)[3];
+       
+       }
+       if (connString && login && password) {
+        sftpSockets[req.params.instance] = {
+            connString: connString,
+            login: login,
+            password: password
+        }
+        if (!sent) {
+        res.json({
+            connString: connString,
+            login: login,
+            password: password
+        })
+        sent = true;
+        
+    }
+    }
+    })
+    sftp.stderr.on("data", (data) => {
+        console.log(data.toString())
+    })
+    sftp.on("close", (code) => {
+        console.log(code)
+    })
+    
+})
 app.ws("/events", (wss, req) => {
 
     try {
