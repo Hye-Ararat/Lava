@@ -41,9 +41,7 @@ app.ws("/instances/:instance/files/unzip", async (ws, req) => {
     })
 })
 app.get("/instances/:instance/sftp", async (req, res) => {
-    let mainIp = await axios.get("https://api.ipify.org?format=json");
-    mainIp = mainIp.data.ip;
-    let sftp = spawn("incus", `file mount ${req.params.instance} --listen ${mainIp}:0`.split(" "))
+    let sftp = spawn("incus", `file mount ${req.params.instance} --listen 0.0.0.0:0`.split(" "))
     let connString = null;
     let login = null;
     let password = null;
