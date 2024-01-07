@@ -5,6 +5,7 @@ import { listen as eventHandler } from "./eventHandler.js";
 import { LXDclient } from "./incus.js";
 import { exec, execSync, spawn } from "child_process";
 import cors from "cors";
+import { readFileSync } from "fs";
 const app = express();
 expressWs(app)
 app.use(cors())
@@ -48,36 +49,36 @@ app.get("/instances/:instance/sftp", async (req, res) => {
     let sent = false;
     if (sftpSockets[req.params.instance]) {
         if (!sent) {
-        res.json(sftpSockets[req.params.instance])
-        sent = true;
+            res.json(sftpSockets[req.params.instance])
+            sent = true;
         }
         return;
     }
     sftp.stdout.on("data", (data) => {
         if (data.toString().includes("SSH SFTP listening on ")) {
             connString = data.toString().split("SSH SFTP listening on ")[1].replace("\n", "").split("Login")[0];
-        } 
-       if (data.toString().includes("Login with")) {
-        login = data.toString().split(`"`)[1];
-        password = data.toString().split(`"`)[3];
-       
-       }
-       if (connString && login && password) {
-        sftpSockets[req.params.instance] = {
-            connString: connString,
-            login: login,
-            password: password
         }
-        if (!sent) {
-        res.json({
-            connString: connString,
-            login: login,
-            password: password
-        })
-        sent = true;
-        
-    }
-    }
+        if (data.toString().includes("Login with")) {
+            login = data.toString().split(`"`)[1];
+            password = data.toString().split(`"`)[3];
+
+        }
+        if (connString && login && password) {
+            sftpSockets[req.params.instance] = {
+                connString: connString,
+                login: login,
+                password: password
+            }
+            if (!sent) {
+                res.json({
+                    connString: connString,
+                    login: login,
+                    password: password
+                })
+                sent = true;
+
+            }
+        }
     })
     sftp.stderr.on("data", (data) => {
         console.log(data.toString())
@@ -85,7 +86,7 @@ app.get("/instances/:instance/sftp", async (req, res) => {
     sftp.on("close", (code) => {
         console.log(code)
     })
-    
+
 })
 app.ws("/events", (wss, req) => {
 
@@ -105,33 +106,76 @@ let sockets = {};
 
 eventHandler(sockets);
 
+app.ws("/instance/:instance/console", (ws, req) => {
+    console.log(sockets, "THE SOCKETS")
+    console.log(sockets[`${req.params.instance}-console`])
+    console.log("This is the socket ^")
+    try {
+        try {
+            sockets[`${req.params.instance}-console`].connections += 1;
+            sockets[`${req.params.instance}-console-control`].connections += 1;
 
 
-    app.ws("/operations/:operation/websocket", (ws, req) => {
-        console.log(sockets)
-        console.log(sockets[req.query.secret])
+        } catch (error) {
+
+        }
+        let logs = readFileSync(`./logs/${req.params.instance}/logs`).toString();
+        //send logs as binary
+        ws.send(logs, { binary: true });
+        sockets[`${req.params.instance}-console`].socket.addEventListener("message", (data) => {
+            ws.send(data.data, { binary: true });
+        })
+        sockets[`${req.params.instance}-console-control`].socket.addEventListener("message", (data) => {
+            ws.send(data.data, { binary: true });
+        })
+        ws.on("message", (data) => {
+            sockets[`${req.params.instance}-console`].socket.send(data, { binary: true });
+        })
+        ws.on("close", () => {
+            try {
+                let number = sockets[`${req.params.instance}-console`].connections;
+
+                sockets[`${req.params.instance}-console`].connections -= 1;
+                sockets[`${req.params.instance}-console-control`].connections -= 1;
+
+
+            } catch (error) {
+
+            }
+
+        })
+    } catch (error) {
+
+    }
+
+})
+
+app.ws("/operations/:operation/websocket", (ws, req) => {
+    console.log(sockets)
+    console.log(sockets[req.query.secret])
+    try {
         if (!(sockets[req.query.secret])) {
             try {
                 console.log("NEW SOCKET")
-                let socket =  LXDclient.request.websocket(`/1.0/operations/${req.params.operation}/websocket?secret=${req.query.secret}`)
-                 console.log('got past')
-                 socket.onclose = () => {
-                     delete sockets[req.query.secret];
-                 }
-                 sockets[req.query.secret] = {
-                     connections: 0,
-                     socket: socket
-                 }
+                let socket = LXDclient.request.websocket(`/1.0/operations/${req.params.operation}/websocket?secret=${req.query.secret}`)
+                console.log('got past')
+                socket.onclose = () => {
+                    delete sockets[req.query.secret];
+                }
+                sockets[req.query.secret] = {
+                    connections: 0,
+                    socket: socket
+                }
             } catch (error) {
-                
+
             }
-    
+
         }
         try {
             sockets[req.query.secret].connections += 1;
 
         } catch (error) {
-            
+
         }
         sockets[req.query.secret].socket.addEventListener("message", (data) => {
             ws.send(data.data, { binary: true });
@@ -144,18 +188,22 @@ eventHandler(sockets);
                 let number = sockets[req.query.secret].connections;
                 if (number == 1) {
                     if (!sockets[req.query.secret].stateless) {
-                    sockets[req.query.secret].socket.close();
-                    delete sockets[req.query.secret];
+                        sockets[req.query.secret].socket.close();
+                        delete sockets[req.query.secret];
                     }
                 } else {
                     sockets[req.query.secret].connections -= 1;
                 }
             } catch (error) {
-                
+
             }
-        
+
         })
-    })
+    } catch (error) {
+
+    }
+
+})
 
 
 
