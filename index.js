@@ -5,10 +5,14 @@ import { listen as eventHandler } from "./eventHandler.js";
 import { LXDclient } from "./incus.js";
 import { exec, execSync, spawn } from "child_process";
 import cors from "cors";
-import { readFileSync } from "fs";
+import { access, readFileSync } from "fs";
+import axios from "axios";
+import { CredentialsMethod, OpenFgaClient } from "@openfga/sdk"
 const app = express();
 expressWs(app)
 app.use(cors())
+
+
 function openWebsocket(path, access_token, url) {
     var u = new URL(url);
     return new ws.WebSocket("wss://" + u.host + "/1.0" + path, {
@@ -23,6 +27,42 @@ function openWebsocket(path, access_token, url) {
 //@ts-expect-error
 let sftpSockets = {};
 app.ws("/instances/:instance/files/unzip", async (ws, req) => {
+    let lxdConfig = await LXDclient.request.get("/1.0");
+    let araratUrl = lxdConfig.data.metadata.config["oidc.issuer"].split("/oidc")[0];
+    let fgaKey = lxdConfig.data.metadata.config["openfga.api.token"];
+    let fgaStoreId = lxdConfig.data.metadata.config["openfga.store.id"];
+    let fgaStoreModel = lxdConfig.data.metadata.config["openfga.store.model_id"];
+    let valid;
+    try {
+        valid = await axios.get(`${araratUrl}/api/authentication/verify`, {
+            headers: {
+                "access_token": accessToken
+            }
+        })
+    } catch (error) {
+        console.log(error.response.data)
+        return;
+    }
+    const fgaClient = new OpenFgaClient({
+        apiScheme: "http",
+        apiHost: "127.0.0.1:8080",
+        authorizationModelId: fgaStoreModel,
+        storeId: fgaStoreId,
+        credentials: {
+            method: CredentialsMethod.ApiToken,
+            config: {
+                token: fgaKey
+            }
+        }
+    })
+    let user = await fgaClient.check({
+        user: `user:${valid.data.id}`,
+        relation: "user",
+        object: `instance:default/${req.params.instance}`,
+    })
+    if (user.allowed == false) {
+        return ws.close();
+    }
     let path = req.query.path;
     let instance = req.params.instance;
     console.log(`unzip ${path}`)
@@ -42,6 +82,44 @@ app.ws("/instances/:instance/files/unzip", async (ws, req) => {
     })
 })
 app.get("/instances/:instance/sftp", async (req, res) => {
+    let lxdConfig = await LXDclient.request.get("/1.0");
+    let araratUrl = lxdConfig.data.metadata.config["oidc.issuer"].split("/oidc")[0];
+    let fgaKey = lxdConfig.data.metadata.config["openfga.api.token"];
+    let fgaStoreId = lxdConfig.data.metadata.config["openfga.store.id"];
+    let fgaStoreModel = lxdConfig.data.metadata.config["openfga.store.model_id"];
+    let valid;
+    try {
+        valid = await axios.get(`${araratUrl}/api/authentication/verify`, {
+            headers: {
+                "access_token": accessToken
+            }
+        })
+    } catch (error) {
+        console.log(error.response.data)
+        return;
+    }
+    const fgaClient = new OpenFgaClient({
+        apiScheme: "http",
+        apiHost: "127.0.0.1:8080",
+        authorizationModelId: fgaStoreModel,
+        storeId: fgaStoreId,
+        credentials: {
+            method: CredentialsMethod.ApiToken,
+            config: {
+                token: fgaKey
+            }
+        }
+    })
+    let user = await fgaClient.check({
+        user: `user:${valid.data.id}`,
+        relation: "user",
+        object: `instance:default/${req.params.instance}`,
+    })
+    if (user.allowed == false) {
+        return res.status(403).json({
+            error: "You are not allowed to access this instance"
+        })
+    }
     let sftp = spawn("incus", `file mount ${req.params.instance} --listen 0.0.0.0:0`.split(" "))
     let connString = null;
     let login = null;
@@ -106,10 +184,49 @@ let sockets = {};
 
 eventHandler(sockets);
 
-app.ws("/instance/:instance/console", (ws, req) => {
-    console.log(sockets, "THE SOCKETS")
-    console.log(sockets[`${req.params.instance}-console`])
-    console.log("This is the socket ^")
+app.ws("/instance/:instance/console", async (ws, req) => {
+    let accessToken = req.query.access_token;
+    let lxdConfig = await LXDclient.request.get("/1.0");
+    let araratUrl = lxdConfig.data.metadata.config["oidc.issuer"].split("/oidc")[0];
+    let fgaKey = lxdConfig.data.metadata.config["openfga.api.token"];
+    let fgaStoreId = lxdConfig.data.metadata.config["openfga.store.id"];
+    let fgaStoreModel = lxdConfig.data.metadata.config["openfga.store.model_id"];
+    let valid;
+    try {
+        valid = await axios.get(`${araratUrl}/api/authentication/verify`, {
+            headers: {
+                "access_token": accessToken
+            }
+        })
+    } catch (error) {
+        console.log(error.response.data)
+        return;
+    }
+    const fgaClient = new OpenFgaClient({
+        apiScheme: "http",
+        apiHost: "127.0.0.1:8080",
+        authorizationModelId: fgaStoreModel,
+        storeId: fgaStoreId,
+        credentials: {
+            method: CredentialsMethod.ApiToken,
+            config: {
+                token: fgaKey
+            }
+        }
+    })
+    let user = await fgaClient.check({
+        user: `user:${valid.data.id}`,
+        relation: "user",
+        object: `instance:default/${req.params.instance}`,
+    })
+    if (user.allowed == false) {
+        return ws.close();
+    }
+    console.log(user)
+    console.log(valid.data)
+    //console.log(sockets, "THE SOCKETS")
+    //console.log(sockets[`${req.params.instance}-console`])
+    //console.log("This is the socket ^")
     try {
         try {
             sockets[`${req.params.instance}-console`].connections += 1;
